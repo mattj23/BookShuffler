@@ -19,7 +19,7 @@ namespace BookShuffler
             {
                 desktop.MainWindow = new MainWindow
                 {
-                    DataContext = new MainWindowViewModel(),
+                    DataContext = new AppViewModel(),
                 };
             }
 

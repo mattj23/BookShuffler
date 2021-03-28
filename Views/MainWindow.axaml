@@ -6,12 +6,99 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="BookShuffler.Views.MainWindow"
         Icon="/Assets/avalonia-logo.ico"
-        Title="BookShuffler">
+        Title="{Binding AppTitle}">
 
     <Design.DataContext>
-        <vm:MainWindowViewModel/>
+        <vm:AppViewModel/>
     </Design.DataContext>
+    <Window.Styles>
+        <Style Selector="ItemsControl > ContentPresenter">
+            <Setter Property="Canvas.Left" Value="{Binding Position.X}"/>
+            <Setter Property="Canvas.Top" Value="{Binding Position.Y}"/>
+      
+            <Setter Property="Transitions">                            
+                <Transitions>
+                    <DoubleTransition  Property="Opacity" Duration="0:0:0:0.5"/>
+                </Transitions>
+            </Setter>
+      
+        </Style>
+    </Window.Styles>
 
-    <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        
+        <!-- Main Application Menu -->
+        <Menu Grid.Row="0"
+              Grid.Column="0"
+              Grid.ColumnSpan="2">
+            <MenuItem Header="Project">
+                <MenuItem Header="_New" />
+                <MenuItem Header="_Open" />
+                <MenuItem Header="_Save" IsEnabled="{Binding HasActiveProject}"/>
+            </MenuItem>
+        </Menu>
+        
+        <!-- Project Content Tree View -->
+        <TreeView Grid.Row="1"
+                  Grid.Column="0"
+                  MinWidth="50"
+                  Items="{Binding RootItem}"
+                  SelectedItem="{Binding SelectedEntity}"
+                  Padding="10"
+                  Background="LightGray">
+            <TreeView.DataTemplates>
+                <!-- Section View Template -->
+                <TreeDataTemplate DataType="vm:SectionView"
+                                  ItemsSource="{Binding Entities}">
+                    <TextBlock Text="{Binding Summary}" />
+                </TreeDataTemplate>
+                
+                <!-- Index Card View Template -->
+                <TreeDataTemplate DataType="vm:IndexCardView">
+                    <TextBlock Text="{Binding Summary}" />
+                </TreeDataTemplate>
+                
+            </TreeView.DataTemplates>
+            
+        </TreeView>
+        
+        <!-- Layout Editor -->
+        <ItemsControl Grid.Row="1"
+                      Grid.Column="1"
+                      Items="{Binding ActiveSection.Entities}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <Canvas Background="LightBlue" />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Border BorderBrush="Black"
+                            CornerRadius="10"
+                               BorderThickness="1"
+                               PointerPressed="InputElement_OnPointerPressed"
+                               PointerMoved="InputElement_OnPointerMoved"
+                               PointerReleased="InputElement_OnPointerReleased"
+                               Padding="10"
+                               Background="Green"
+                               Tag="{Binding}">
+                        <TextBlock Text="{Binding Summary}"></TextBlock>
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+            
+        </ItemsControl>
+        
+        
+    </Grid>
 
 </Window>
