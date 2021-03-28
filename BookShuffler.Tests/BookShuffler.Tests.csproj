@@ -24,6 +24,9 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Content Include="Sample\test1.md">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
       <None Remove="Sample\test0.md" />
       <Content Include="Sample\test0.md">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
