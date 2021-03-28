@@ -5,7 +5,6 @@ using System.Linq;
 using System.Text;
 using System.Windows.Input;
 using Avalonia;
-using Avalonia.Controls;
 using Avalonia.Controls.Shapes;
 using BookShuffler.Models;
 using BookShuffler.Parsing;
@@ -19,11 +18,18 @@ namespace BookShuffler.ViewModels
         private SectionView _projectRoot;
         private SectionView _activeSection;
         private IEntityView? _selectedEntity;
+        private Rectangle _canvasBounds;
 
         public AppViewModel()
         {
             this.RootItem = new ObservableCollection<IEntityView>();
         }
+        
+        /// <summary>
+        /// Gets a function which returns the canvas boundaries. This is necessary because binding OneWayToSource on
+        /// a property in the XAML is currently broken in Avalonia.
+        /// </summary>
+        public Func<Rect> GetCanvasBounds { get; set; }
 
         public ObservableCollection<IEntityView> RootItem { get; }
 
@@ -40,6 +46,12 @@ namespace BookShuffler.ViewModels
                 this.RaisePropertyChanged(nameof(HasActiveProject));
                 this.RaisePropertyChanged(nameof(AppTitle));
             }
+        }
+
+        public Rectangle CanvasBounds
+        {
+            get => _canvasBounds;
+            set => this.RaiseAndSetIfChanged(ref _canvasBounds, value);
         }
 
         /// <summary>
@@ -119,7 +131,11 @@ namespace BookShuffler.ViewModels
                
                // Now load this section and all of its children
                if (section != null)
-                   _projectRoot.Entities.Add(LoadRecursive(section, loaded));
+               {
+                    var newSection = LoadRecursive(section, loaded);
+                    newSection.AutoTile(this.GetCanvasBounds?.Invoke().Width ?? 1200);
+                   _projectRoot.Entities.Add(newSection);
+               }
 
            }
         }
@@ -132,7 +148,9 @@ namespace BookShuffler.ViewModels
                 var sectionChild = loaded.Sections.FirstOrDefault(s => s.Id == id);
                 if (sectionChild != null)
                 {
-                    viewModel.Entities.Add(LoadRecursive(sectionChild, loaded));
+                    var newSection = LoadRecursive(sectionChild, loaded);
+                    newSection.AutoTile(this.GetCanvasBounds?.Invoke().Width ?? 1200);
+                    viewModel.Entities.Add(newSection);
                     continue;
                 }
 

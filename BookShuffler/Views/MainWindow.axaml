@@ -59,6 +59,7 @@
                 BorderBrush="Black"
                 CornerRadius="2"
                 Padding="10"
+                MaxWidth="500"
                 BorderThickness="2">
 
             <TreeView MinWidth="50"

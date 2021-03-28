@@ -73,6 +73,8 @@ namespace BookShuffler.Views
 
         private async void NewProject_OnClick(object? sender, RoutedEventArgs e)
         {
+            this.ViewModel.GetCanvasBounds = () => _layoutContainer.Bounds;
+            
             var dialog = new OpenFolderDialog
             {
                 Title = "Select Location for New Project"
