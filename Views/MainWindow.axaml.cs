@@ -1,10 +1,16 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Windows.Input;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.LogicalTree;
 using Avalonia.Markup.Xaml;
 using BookShuffler.ViewModels;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using ReactiveUI;
 
 namespace BookShuffler.Views
 {
@@ -24,13 +30,16 @@ namespace BookShuffler.Views
             this.AttachDevTools();
 #endif
         }
+        
+        public ICommand CreateNewProjectCommand { get; }
+        
+        private AppViewModel? ViewModel => this.DataContext as AppViewModel;
 
         private void InitializeComponent()
         {
             AvaloniaXamlLoader.Load(this);
             _layoutContainer = this.FindControl<ItemsControl>("LayoutContainer");
         }
-
 
         private void InputElement_OnPointerPressed(object? sender, PointerPressedEventArgs e)
         {
@@ -62,5 +71,40 @@ namespace BookShuffler.Views
             _selected = null;
         }
 
+        private async void NewProject_OnClick(object? sender, RoutedEventArgs e)
+        {
+            var dialog = new OpenFolderDialog
+            {
+                Title = "Select Location for New Project"
+            };
+
+            var result = await dialog.ShowAsync(this);
+
+            if (string.IsNullOrEmpty(result)) return;
+
+            this.ViewModel.NewProject(result);
+        }
+
+        private async void ImportTaggedMarkdown_OnClick(object? sender, RoutedEventArgs e)
+        {
+            
+            var dialog = new OpenFileDialog
+            {
+                AllowMultiple = true,
+                Directory = ViewModel.ProjectPath,
+                Title = "Select Markdown File(s)",
+                Filters = new List<FileDialogFilter>{new FileDialogFilter()
+                {
+                    Extensions = {"md", "MD"},
+                    Name = "Markdown File"
+                }}
+            };
+
+            var result = await dialog.ShowAsync(this);
+            if (result?.Any() == true)
+            {
+                this.ViewModel.ImportTaggedMarkdown(result);
+            }
+        }
     }
 }

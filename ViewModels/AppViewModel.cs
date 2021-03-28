@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
+using System.Windows.Input;
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Controls.Shapes;
 using BookShuffler.Models;
 using ReactiveUI;
@@ -19,55 +21,56 @@ namespace BookShuffler.ViewModels
 
         public AppViewModel()
         {
-            var root = new Entity
-            {
-                Label = WorkflowLabel.ToDo,
-                Summary = "This is the root level node",
-            };
-            var rootView = new SectionView(root) { Position = new Point(0, 0) };
+            // var root = new Entity
+            // {
+            //     Label = WorkflowLabel.ToDo,
+            //     Summary = "This is the root level node",
+            // };
+            // var rootView = new SectionView(root) { Position = new Point(0, 0) };
+            //
+            // var cards = Enumerable.Range(0, 5).Select(i =>
+            //     new IndexCard
+            //     {
+            //         Id = Guid.NewGuid(),
+            //         Content = $"This is card {i}'s text content, which is a lot of smart stuff.",
+            //         Label = WorkflowLabel.InProgress,
+            //         Notes = $"These are some notes on card {i}",
+            //         Summary = $"Card {i} summary"
+            //     });
+            //
+            // var r = new Random();
+            // foreach (var card in cards)
+            // {
+            //     var vm = new IndexCardView(card) {Position = new Point(r.NextDouble() * 200, r.NextDouble() * 200)};
+            //     rootView.Entities.Add(vm);
+            // }
+            //
+            // var chapter0 = new Entity
+            // {
+            //     Summary = "Chapter SingleFancyWordName"
+            // };
+            // var chapterView0 = new SectionView(chapter0) {Position = new Point(400, 0)};
+            //
+            // var subCards = Enumerable.Range(0, 3).Select(i =>
+            //     new IndexCard
+            //     {
+            //         Id = Guid.NewGuid(),
+            //         Content = $"This is sub card {i}'s text content, which is a lot of smart stuff.",
+            //         Label = WorkflowLabel.InProgress,
+            //         Notes = $"These are some notes on card {i}",
+            //         Summary = $"Lower Card {i} summary"
+            //     });
+            //
+            // foreach (var card in subCards)
+            // {
+            //     var vm = new IndexCardView(card) {Position = new Point(r.NextDouble() * 200, r.NextDouble() * 200)};
+            //     chapterView0.Entities.Add(vm);
+            // }
+            // rootView.Entities.Add(chapterView0);
+            //
+            // this.RootItem = new ObservableCollection<IEntityView> {rootView};
+            // this.ActiveSection = rootView;
 
-            var cards = Enumerable.Range(0, 5).Select(i =>
-                new IndexCard
-                {
-                    Id = Guid.NewGuid(),
-                    Content = $"This is card {i}'s text content, which is a lot of smart stuff.",
-                    Label = WorkflowLabel.InProgress,
-                    Notes = $"These are some notes on card {i}",
-                    Summary = $"Card {i} summary"
-                });
-
-            var r = new Random();
-            foreach (var card in cards)
-            {
-                var vm = new IndexCardView(card) {Position = new Point(r.NextDouble() * 200, r.NextDouble() * 200)};
-                rootView.Entities.Add(vm);
-            }
-
-            var chapter0 = new Entity
-            {
-                Summary = "Chapter SingleFancyWordName"
-            };
-            var chapterView0 = new SectionView(chapter0) {Position = new Point(400, 0)};
-            
-            var subCards = Enumerable.Range(0, 3).Select(i =>
-                new IndexCard
-                {
-                    Id = Guid.NewGuid(),
-                    Content = $"This is sub card {i}'s text content, which is a lot of smart stuff.",
-                    Label = WorkflowLabel.InProgress,
-                    Notes = $"These are some notes on card {i}",
-                    Summary = $"Lower Card {i} summary"
-                });
-
-            foreach (var card in subCards)
-            {
-                var vm = new IndexCardView(card) {Position = new Point(r.NextDouble() * 200, r.NextDouble() * 200)};
-                chapterView0.Entities.Add(vm);
-            }
-            rootView.Entities.Add(chapterView0);
-
-            this.RootItem = new ObservableCollection<IEntityView> {rootView};
-            this.ActiveSection = rootView;
         }
 
         public ObservableCollection<IEntityView> RootItem { get; }
@@ -85,9 +88,9 @@ namespace BookShuffler.ViewModels
 
         public bool HasActiveProject => !string.IsNullOrEmpty(this.ProjectPath);
 
-        public string AppTitle => this.HasActiveProject
+        public string AppTitle => !this.HasActiveProject
             ? "Book Shuffler [no project]"
-            : $"Book Shuffler {ProjectPath}";
+            : $"Book Shuffler [{ProjectPath}]";
 
         public SectionView ActiveSection
         {
@@ -106,6 +109,16 @@ namespace BookShuffler.ViewModels
                     this.ActiveSection = _selectedEntity as SectionView;
                 }
             }
+        }
+
+        public void NewProject(string path)
+        {
+            this.ProjectPath = path;
+        }
+
+        public void ImportTaggedMarkdown(string[] files)
+        {
+            
         }
     }
 }

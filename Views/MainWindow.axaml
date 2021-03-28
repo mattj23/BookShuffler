@@ -6,6 +6,7 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="BookShuffler.Views.MainWindow"
         Icon="/Assets/avalonia-logo.ico"
+        x:Name="MainWindow"
         Title="{Binding AppTitle}">
 
     <Design.DataContext>
@@ -40,9 +41,15 @@
               Grid.Column="0"
               Grid.ColumnSpan="2">
             <MenuItem Header="Project">
-                <MenuItem Header="_New" />
+                <MenuItem Header="_New" Click="NewProject_OnClick"/>
                 <MenuItem Header="_Open" />
-                <MenuItem Header="_Save" IsEnabled="{Binding HasActiveProject}"/>
+                <Separator />
+                <MenuItem Header="_Save" 
+                          IsEnabled="{Binding HasActiveProject}"/>
+                <Separator />
+                <MenuItem Header="Import Tagged Markdown" 
+                          IsEnabled="{Binding HasActiveProject}"
+                          Click="ImportTaggedMarkdown_OnClick" />
             </MenuItem>
         </Menu>
         
