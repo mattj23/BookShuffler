@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookShuffler", "BookShuffler\BookShuffler.csproj", "{CAF0C707-DE93-4A04-BD9A-8E464A26C989}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookShuffler.Tests", "BookShuffler.Tests\BookShuffler.Tests.csproj", "{BC553F80-6F50-4CFB-9BF7-86F4244C7BF2}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CAF0C707-DE93-4A04-BD9A-8E464A26C989}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CAF0C707-DE93-4A04-BD9A-8E464A26C989}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CAF0C707-DE93-4A04-BD9A-8E464A26C989}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CAF0C707-DE93-4A04-BD9A-8E464A26C989}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BC553F80-6F50-4CFB-9BF7-86F4244C7BF2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BC553F80-6F50-4CFB-9BF7-86F4244C7BF2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BC553F80-6F50-4CFB-9BF7-86F4244C7BF2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BC553F80-6F50-4CFB-9BF7-86F4244C7BF2}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
