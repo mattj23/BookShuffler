@@ -19,7 +19,7 @@ namespace BookShuffler.ViewModels
 
         public SectionView()
         {
-            
+            Entities = new ObservableCollection<IEntityView>();
         }
 
         public ObservableCollection<IEntityView> Entities { get; }

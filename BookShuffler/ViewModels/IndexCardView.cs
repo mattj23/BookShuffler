@@ -42,6 +42,17 @@ namespace BookShuffler.ViewModels
             }
         }
         
+        public string Content
+        {
+            get => _model.Content;
+            set
+            {
+                if (_model.Content == value) return;
+                _model.Content = value;
+                this.RaisePropertyChanged();
+            }
+        }
+        
         public WorkflowLabel Label
         {
             get => _model.Label;
@@ -53,6 +64,5 @@ namespace BookShuffler.ViewModels
             }
         }
 
-        public string Content { get; set; }
     }
 }

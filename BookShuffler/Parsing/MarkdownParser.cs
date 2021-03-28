@@ -69,6 +69,10 @@ namespace BookShuffler.Parsing
                     }
 
                     result.Sections.Add(newSection);
+                    if (deepest.Level == 0)
+                    {
+                        result.Chapters.Add(newSection.Id);
+                    }
                 }
             });
 

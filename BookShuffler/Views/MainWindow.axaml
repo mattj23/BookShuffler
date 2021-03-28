@@ -123,10 +123,13 @@
                                        BorderBrush="DarkGray"
                                        BorderThickness="1" />
 
-                            <ScrollViewer Grid.Row="2">
+                            <ScrollViewer Grid.Row="2"
+                                          MaxHeight="300"
+                                          HorizontalScrollBarVisibility="Disabled"
+                                          VerticalScrollBarVisibility="Auto">
                                 <TextBlock Text="{Binding Content}"
                                            Margin="5"
-                                           TextWrapping="WrapWithOverflow" />
+                                           TextWrapping="Wrap" />
                             </ScrollViewer>
                         </Grid>
                     </Border>
