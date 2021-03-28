@@ -41,15 +41,20 @@
               Grid.Column="0"
               Grid.ColumnSpan="2">
             <MenuItem Header="Project">
-                <MenuItem Header="_New" Click="NewProject_OnClick"/>
+                <MenuItem Header="_New" Click="NewProject_OnClick" />
                 <MenuItem Header="_Open" />
                 <Separator />
-                <MenuItem Header="_Save" 
-                          IsEnabled="{Binding HasActiveProject}"/>
+                <MenuItem Header="_Save"
+                          IsEnabled="{Binding HasActiveProject}" />
                 <Separator />
-                <MenuItem Header="Import Tagged Markdown" 
+                <MenuItem Header="Import Tagged Markdown"
                           IsEnabled="{Binding HasActiveProject}"
                           Click="ImportTaggedMarkdown_OnClick" />
+            </MenuItem>
+
+            <MenuItem Header="View">
+                <MenuItem Header="Auto Tile"
+                          Click="AutoTile_OnClick" />
             </MenuItem>
         </Menu>
         
@@ -59,6 +64,7 @@
                 BorderBrush="Black"
                 CornerRadius="2"
                 Padding="10"
+                Margin="2"
                 MaxWidth="500"
                 BorderThickness="2">
 
@@ -81,64 +87,72 @@
 
             </TreeView>
         </Border>
-        
+
         <!-- Layout Editor -->
-        <ItemsControl Grid.Row="1"
-                      Grid.Column="1"
-                      x:Name="LayoutContainer"
-                      Items="{Binding ActiveSection.Entities}">
-            <ItemsControl.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <Canvas />
-                </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
+        <Border Grid.Row="1"
+               Grid.Column="1"
+               BorderThickness="2"
+               CornerRadius="2"
+               Margin="0 2 2 2"
+               BorderBrush="Black">
+            
+            <ItemsControl x:Name="LayoutContainer"
+                          PointerPressed="LayoutContainer_OnPointerPressed"
+                          PointerMoved="LayoutContainer_OnPointerMoved"
+                          PointerReleased="LayoutContainer_OnPointerReleased"
+                          Items="{Binding ActiveSection.Entities}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <Canvas Background="White"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
 
-            <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <!-- Content Template -->
-                    <Border BorderBrush="Black"
-                            CornerRadius="5"
-                            BorderThickness="2"
-                            PointerPressed="InputElement_OnPointerPressed"
-                            PointerMoved="InputElement_OnPointerMoved"
-                            PointerReleased="InputElement_OnPointerReleased"
-                            Padding="7"
-                            MaxWidth="400"
-                            MaxHeight="400"
-                            Background="WhiteSmoke"
-                            Tag="{Binding}">
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                            </Grid.RowDefinitions>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <!-- Content Template -->
+                        <Border BorderBrush="Black"
+                                CornerRadius="5"
+                                BorderThickness="2"
+                                PointerPressed="InputElement_OnPointerPressed"
+                                PointerMoved="InputElement_OnPointerMoved"
+                                PointerReleased="InputElement_OnPointerReleased"
+                                Padding="7"
+                                MaxWidth="400"
+                                MaxHeight="400"
+                                Background="WhiteSmoke"
+                                Tag="{Binding}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
 
-                            <TextBlock Grid.Row="0"
-                                       TextWrapping="Wrap"
-                                       FontWeight="Bold"
-                                       Margin="3"
-                                       Text="{Binding Summary}" />
+                                <TextBlock Grid.Row="0"
+                                           TextWrapping="Wrap"
+                                           FontWeight="Bold"
+                                           Margin="3"
+                                           Text="{Binding Summary}" />
 
-                            <Separator Grid.Row="1"
-                                       BorderBrush="DarkGray"
-                                       BorderThickness="1" />
+                                <Separator Grid.Row="1"
+                                           BorderBrush="DarkGray"
+                                           BorderThickness="1" />
 
-                            <ScrollViewer Grid.Row="2"
-                                          MaxHeight="300"
-                                          HorizontalScrollBarVisibility="Disabled"
-                                          VerticalScrollBarVisibility="Auto">
-                                <TextBlock Text="{Binding Content}"
-                                           Margin="5"
-                                           TextWrapping="Wrap" />
-                            </ScrollViewer>
-                        </Grid>
-                    </Border>
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
+                                <ScrollViewer Grid.Row="2"
+                                              MaxHeight="300"
+                                              HorizontalScrollBarVisibility="Disabled"
+                                              VerticalScrollBarVisibility="Auto">
+                                    <TextBlock Text="{Binding Content}"
+                                               Margin="5"
+                                               TextWrapping="Wrap" />
+                                </ScrollViewer>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
 
-        </ItemsControl>
-        
+            </ItemsControl>
+        </Border>
         
     </Grid>
 

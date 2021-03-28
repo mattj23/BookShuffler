@@ -19,10 +19,14 @@ namespace BookShuffler.ViewModels
         private SectionView _activeSection;
         private IEntityView? _selectedEntity;
         private Rectangle _canvasBounds;
+        private double _canvasTop;
+        private double _canvasLeft;
 
         public AppViewModel()
         {
             this.RootItem = new ObservableCollection<IEntityView>();
+            this.CanvasTop = 0;
+            this.CanvasLeft = 0;
         }
         
         /// <summary>
@@ -32,6 +36,18 @@ namespace BookShuffler.ViewModels
         public Func<Rect> GetCanvasBounds { get; set; }
 
         public ObservableCollection<IEntityView> RootItem { get; }
+
+        public double CanvasTop
+        {
+            get => _canvasTop;
+            set => this.RaiseAndSetIfChanged(ref _canvasTop, value);
+        }
+
+        public double CanvasLeft
+        {
+            get => _canvasLeft;
+            set => this.RaiseAndSetIfChanged(ref _canvasLeft, value);
+        }
 
         /// <summary>
         /// Gets the path of the actively loaded project. The application also uses this to determine whether or not

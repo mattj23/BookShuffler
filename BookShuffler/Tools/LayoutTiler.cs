@@ -16,13 +16,13 @@ namespace BookShuffler.Parsing
         public static void AutoTile(this SectionView section, double width)
         {
             // Assumes that the size of each tile is 400x400
-            double x = 0;
-            double y = 0;
+            double x = Spacing;
+            double y = Spacing;
             foreach (var entity in section.Entities)
             {
                 if (x + TileWidth > width)
                 {
-                    x = 0;
+                    x = Spacing;
                     y += TileHeight + Spacing;
                 }
 

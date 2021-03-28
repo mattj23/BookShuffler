@@ -8,6 +8,8 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.LogicalTree;
 using Avalonia.Markup.Xaml;
+using Avalonia.Media;
+using BookShuffler.Parsing;
 using BookShuffler.ViewModels;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using ReactiveUI;
@@ -19,6 +21,7 @@ namespace BookShuffler.Views
         private IEntityView? _selected;
         private Point _clickPoint;
         private Point _dragStart;
+        private bool _isPanning = false;
         private ItemsControl _layoutContainer;
         private Border? _selectedBorder;
         
@@ -41,6 +44,35 @@ namespace BookShuffler.Views
             _layoutContainer = this.FindControl<ItemsControl>("LayoutContainer");
         }
 
+        private void LayoutContainer_OnPointerPressed(object? sender, PointerPressedEventArgs e)
+        {
+            var pointer = e.GetCurrentPoint(_layoutContainer);
+            if (pointer.Properties.IsLeftButtonPressed)
+            {
+                _dragStart = pointer.Position;
+                _isPanning = true;
+            }
+        }
+        
+        private void LayoutContainer_OnPointerMoved(object? sender, PointerEventArgs e)
+        {
+            if (_isPanning & this.ViewModel != null)
+            {
+                var pointer = e.GetCurrentPoint(_layoutContainer);
+                var shift = pointer.Position - _dragStart;
+                _dragStart = pointer.Position;
+                foreach (var entity in this.ViewModel.ActiveSection.Entities)
+                {
+                    entity.Position += shift;
+                }
+            }
+        }
+
+        private void LayoutContainer_OnPointerReleased(object? sender, PointerReleasedEventArgs e)
+        {
+            _isPanning = false;
+        }
+        
         private void InputElement_OnPointerPressed(object? sender, PointerPressedEventArgs e)
         {
             var pointer = e.GetCurrentPoint(_layoutContainer);
@@ -51,7 +83,8 @@ namespace BookShuffler.Views
                 _clickPoint = pointer.Position;
                 _dragStart = box.Position;
             }
-            
+
+            e.Handled = true;
         }
 
         private void InputElement_OnPointerMoved(object? sender, PointerEventArgs e)
@@ -64,6 +97,8 @@ namespace BookShuffler.Views
                 _selected.Position = new Point(Math.Min(Math.Max(0, x), _layoutContainer.Bounds.Width - _selectedBorder.Bounds.Width),
                     Math.Min(Math.Max(0, y), _layoutContainer.Bounds.Height - _selectedBorder.Bounds.Height));
             }
+
+            e.Handled = true;
         }
 
         private void InputElement_OnPointerReleased(object? sender, PointerReleasedEventArgs e)
@@ -107,6 +142,11 @@ namespace BookShuffler.Views
             {
                 this.ViewModel.ImportTaggedMarkdown(result);
             }
+        }
+
+        private void AutoTile_OnClick(object? sender, RoutedEventArgs e)
+        {
+            this.ViewModel?.ActiveSection?.AutoTile(_layoutContainer.Bounds.Width);
         }
     }
 }
