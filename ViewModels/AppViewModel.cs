@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using Avalonia;
+using Avalonia.Controls.Shapes;
 using BookShuffler.Models;
 using ReactiveUI;
 
@@ -68,7 +69,7 @@ namespace BookShuffler.ViewModels
             this.RootItem = new ObservableCollection<IEntityView> {rootView};
             this.ActiveSection = rootView;
         }
-        
+
         public ObservableCollection<IEntityView> RootItem { get; }
 
         public string? ProjectPath

@@ -20,7 +20,7 @@ namespace BookShuffler.ViewModels
             set => this.RaiseAndSetIfChanged(ref _position, value);
         }
         
-        public string? Summary
+        public string Summary
         {
             get => _model.Summary;
             set
@@ -52,5 +52,7 @@ namespace BookShuffler.ViewModels
                 this.RaisePropertyChanged();
             }
         }
+
+        public string Content { get; set; }
     }
 }

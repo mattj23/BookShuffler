@@ -47,55 +47,85 @@
         </Menu>
         
         <!-- Project Content Tree View -->
-        <TreeView Grid.Row="1"
-                  Grid.Column="0"
-                  MinWidth="50"
-                  Items="{Binding RootItem}"
-                  SelectedItem="{Binding SelectedEntity}"
-                  Padding="10"
-                  Background="LightGray">
-            <TreeView.DataTemplates>
-                <!-- Section View Template -->
-                <TreeDataTemplate DataType="vm:SectionView"
-                                  ItemsSource="{Binding Entities}">
-                    <TextBlock Text="{Binding Summary}" />
-                </TreeDataTemplate>
-                
-                <!-- Index Card View Template -->
-                <TreeDataTemplate DataType="vm:IndexCardView">
-                    <TextBlock Text="{Binding Summary}" />
-                </TreeDataTemplate>
-                
-            </TreeView.DataTemplates>
-            
-        </TreeView>
+        <Border Grid.Row="1"
+                Grid.Column="0"
+                BorderBrush="Black"
+                CornerRadius="2"
+                Padding="10"
+                BorderThickness="2">
+
+            <TreeView MinWidth="50"
+                      Items="{Binding RootItem}"
+                      SelectedItem="{Binding SelectedEntity}">
+                <TreeView.DataTemplates>
+                    <!-- Section View Template -->
+                    <TreeDataTemplate DataType="vm:SectionView"
+                                      ItemsSource="{Binding Entities}">
+                        <TextBlock Text="{Binding Summary}" />
+                    </TreeDataTemplate>
+
+                    <!-- Index Card View Template -->
+                    <TreeDataTemplate DataType="vm:IndexCardView">
+                        <TextBlock Text="{Binding Summary}" />
+                    </TreeDataTemplate>
+
+                </TreeView.DataTemplates>
+
+            </TreeView>
+        </Border>
         
         <!-- Layout Editor -->
         <ItemsControl Grid.Row="1"
                       Grid.Column="1"
+                      x:Name="LayoutContainer"
                       Items="{Binding ActiveSection.Entities}">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
-                    <Canvas Background="LightBlue" />
+                    <Canvas />
                 </ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>
-            
+
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
+                    <!-- Content Template -->
                     <Border BorderBrush="Black"
-                            CornerRadius="10"
-                               BorderThickness="1"
-                               PointerPressed="InputElement_OnPointerPressed"
-                               PointerMoved="InputElement_OnPointerMoved"
-                               PointerReleased="InputElement_OnPointerReleased"
-                               Padding="10"
-                               Background="Green"
-                               Tag="{Binding}">
-                        <TextBlock Text="{Binding Summary}"></TextBlock>
+                            CornerRadius="5"
+                            BorderThickness="2"
+                            PointerPressed="InputElement_OnPointerPressed"
+                            PointerMoved="InputElement_OnPointerMoved"
+                            PointerReleased="InputElement_OnPointerReleased"
+                            Padding="7"
+                            MaxWidth="400"
+                            MaxHeight="400"
+                            Background="WhiteSmoke"
+                            Tag="{Binding}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Grid.Row="0"
+                                       TextWrapping="Wrap"
+                                       FontWeight="Bold"
+                                       Margin="3"
+                                       Text="{Binding Summary}" />
+
+                            <Separator Grid.Row="1"
+                                       BorderBrush="DarkGray"
+                                       BorderThickness="1" />
+
+                            <ScrollViewer Grid.Row="2">
+                                <TextBlock Text="{Binding Content}"
+                                           Margin="5"
+                                           TextWrapping="WrapWithOverflow" />
+                            </ScrollViewer>
+                        </Grid>
                     </Border>
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
-            
+
         </ItemsControl>
         
         

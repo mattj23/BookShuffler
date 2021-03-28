@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Linq;
 using Avalonia;
 using BookShuffler.Models;
 using ReactiveUI;
@@ -29,7 +30,7 @@ namespace BookShuffler.ViewModels
             set => this.RaiseAndSetIfChanged(ref _position, value);
         }
 
-        public string? Summary
+        public string Summary
         {
             get => _model.Summary;
             set
@@ -61,5 +62,7 @@ namespace BookShuffler.ViewModels
                 this.RaisePropertyChanged();
             }
         }
+
+        public string Content => string.Join("\n", this.Entities.Select(x => x.Summary));
     }
 }
