@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Subjects;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -24,12 +25,14 @@ namespace BookShuffler.ViewModels
         private SectionView _projectRoot;
         private SectionView _activeSection;
         private IEntityView? _selectedEntity;
-        private Rectangle _canvasBounds;
         private double _canvasTop;
         private double _canvasLeft;
         private IEntityView? _selectedDetachedEntity;
 
         private readonly BehaviorSubject<bool> _selectedIsSectionSubject;
+        private double _canvasScale;
+        private double _treeScale;
+
         public AppViewModel()
         {
             _selectedIsSectionSubject = new BehaviorSubject<bool>(false);
@@ -48,6 +51,12 @@ namespace BookShuffler.ViewModels
                 ReactiveCommand.Create(this.AddCardToSelected, _selectedIsSectionSubject);
             this.CreateSectionCommand =
                 ReactiveCommand.Create(this.AddSectionToSelected, _selectedIsSectionSubject);
+
+            this.SetCanvasScale = ReactiveCommand.Create<string>(d => this.CanvasScale = double.Parse(d));
+            this.SetTreeScale = ReactiveCommand.Create<string>(d => this.TreeScale = double.Parse(d));
+
+            this.CanvasScale = 1;
+            this.TreeScale = 1;
             
             this.LoadSettings();
 
@@ -59,6 +68,9 @@ namespace BookShuffler.ViewModels
         
         public AppSettings Settings { get; private set; }
         
+        public ICommand SetCanvasScale { get; }
+        public ICommand SetTreeScale { get; }
+        
         public ICommand SaveProjectCommand { get; }
         
         public ICommand DetachSelectedCommand { get; }
@@ -69,7 +81,19 @@ namespace BookShuffler.ViewModels
         public ICommand AttachSelectedCommand { get; }
         public ICommand CreateCardCommand { get; }
         public ICommand CreateSectionCommand { get; }
-        
+
+        public double CanvasScale
+        {
+            get => _canvasScale;
+            set => this.RaiseAndSetIfChanged(ref _canvasScale, value);
+        }
+
+        public double TreeScale
+        {
+            get => _treeScale;
+            set => this.RaiseAndSetIfChanged(ref _treeScale, value);
+        }
+
         /// <summary>
         /// Gets a function which returns the canvas boundaries. This is necessary because binding OneWayToSource on
         /// a property in the XAML is currently broken in Avalonia.

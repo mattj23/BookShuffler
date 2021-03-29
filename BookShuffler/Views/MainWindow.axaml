@@ -57,6 +57,23 @@
             <MenuItem Header="View">
                 <MenuItem Header="Auto Tile"
                           Click="AutoTile_OnClick" />
+                
+                <MenuItem Header="Canvas Scale">
+                    <MenuItem Header="40%" Command="{Binding SetCanvasScale}" CommandParameter="0.4" />
+                    <MenuItem Header="60%" Command="{Binding SetCanvasScale}" CommandParameter="0.6" />
+                    <MenuItem Header="80%" Command="{Binding SetCanvasScale}" CommandParameter="0.8" />
+                    <MenuItem Header="100%" Command="{Binding SetCanvasScale}" CommandParameter="1.0" />
+                    <MenuItem Header="120%" Command="{Binding SetCanvasScale}" CommandParameter="1.2" />
+                    <MenuItem Header="140%" Command="{Binding SetCanvasScale}" CommandParameter="1.4" />
+                    <MenuItem Header="160%" Command="{Binding SetCanvasScale}" CommandParameter="1.6" />
+                </MenuItem>
+                
+                <MenuItem Header="Project Tree Scale">
+                    <MenuItem Header="40%" Command="{Binding SetTreeScale}" CommandParameter="0.4" />
+                    <MenuItem Header="60%" Command="{Binding SetTreeScale}" CommandParameter="0.6" />
+                    <MenuItem Header="80%" Command="{Binding SetTreeScale}" CommandParameter="0.8" />
+                    <MenuItem Header="100%" Command="{Binding SetTreeScale}" CommandParameter="1.0" />
+                </MenuItem>
             </MenuItem>
         </Menu>
         
@@ -69,7 +86,13 @@
                 Margin="2"
                 MaxWidth="500"
                 BorderThickness="2">
-            <TabControl>
+            <LayoutTransformControl>
+                <LayoutTransformControl.LayoutTransform>
+                    <ScaleTransform ScaleX="{Binding TreeScale}"
+                                    ScaleY="{Binding TreeScale}" />
+                </LayoutTransformControl.LayoutTransform>
+                
+                <TabControl>
                 <TabItem Header="Project Entities">
 
                     <TreeView MinWidth="50"
@@ -156,6 +179,9 @@
 
                 </TabItem>
             </TabControl>
+            
+                
+            </LayoutTransformControl>
         </Border>
 
         <!-- Layout Editor -->
@@ -166,11 +192,17 @@
                Margin="0 2 2 2"
                BorderBrush="Black">
             
-            <ItemsControl x:Name="LayoutContainer"
-                          PointerPressed="LayoutContainer_OnPointerPressed"
-                          PointerMoved="LayoutContainer_OnPointerMoved"
-                          PointerReleased="LayoutContainer_OnPointerReleased"
-                          Items="{Binding ActiveSection.Entities}">
+            <LayoutTransformControl>
+                <LayoutTransformControl.LayoutTransform>
+                    <ScaleTransform ScaleX="{Binding CanvasScale}"
+                                    ScaleY="{Binding CanvasScale}" />
+                </LayoutTransformControl.LayoutTransform>
+                
+                <ItemsControl x:Name="LayoutContainer"
+                              PointerPressed="LayoutContainer_OnPointerPressed"
+                              PointerMoved="LayoutContainer_OnPointerMoved"
+                              PointerReleased="LayoutContainer_OnPointerReleased"
+                              Items="{Binding ActiveSection.Entities}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <Canvas Background="White"/>
@@ -222,6 +254,8 @@
                 </ItemsControl.ItemTemplate>
 
             </ItemsControl>
+            </LayoutTransformControl>
+            
         </Border>
         
     </Grid>
