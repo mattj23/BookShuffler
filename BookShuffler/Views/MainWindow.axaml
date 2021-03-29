@@ -166,7 +166,8 @@
                             <TreeDataTemplate DataType="vm:SectionView"
                                               ItemsSource="{Binding Entities}">
                                 <TextBlock Text="{Binding Summary}"
-                                           FontWeight="Bold"/>
+                                           DoubleTapped="Section_OnDoubleTapped"
+                                           FontWeight="Bold" />
                             </TreeDataTemplate>
 
                             <!-- Index Card View Template -->
