@@ -10,6 +10,9 @@ namespace BookShuffler.Parsing
 {
     public class ProjectLoader
     {
+        public const string SectionFolderName = "sections";
+        public const string CardFolderName = "cards";
+
         private readonly Dictionary<Guid, IndexCard> _cards;
         private readonly Dictionary<Guid, SerializableSection> _sectionReps;
         private readonly Dictionary<Guid, SectionView> _builtSections;
@@ -27,8 +30,8 @@ namespace BookShuffler.Parsing
         {
             var result = new LoadResult();
             var fileInfo = new FileInfo(projectFilePath);
-            var sectionPath = Path.Combine(fileInfo.DirectoryName, "sections");
-            var cardPath = Path.Combine(fileInfo.DirectoryName, "cards");
+            var sectionPath = Path.Combine(fileInfo.DirectoryName, SectionFolderName);
+            var cardPath = Path.Combine(fileInfo.DirectoryName, CardFolderName);
 
             var deserializer = new YamlDotNet.Serialization.Deserializer();
 

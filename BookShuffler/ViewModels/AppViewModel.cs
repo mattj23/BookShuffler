@@ -42,6 +42,7 @@ namespace BookShuffler.ViewModels
             this.AttachSelectedCommand = ReactiveCommand.Create(this.AttachSelected);
             this.LaunchEditorCommand = ReactiveCommand.Create(this.LaunchEditorOnSelected);
             this.LoadFromFileCommand = ReactiveCommand.Create(this.LoadSelectedFromFile);
+            this.DeleteEntityCommand = ReactiveCommand.Create(this.DeleteSelected);
 
             this.CreateCardCommand =
                 ReactiveCommand.Create(this.AddCardToSelected, _selectedIsSectionSubject);
@@ -62,6 +63,7 @@ namespace BookShuffler.ViewModels
         
         public ICommand DetachSelectedCommand { get; }
         
+        public ICommand DeleteEntityCommand { get; }
         public ICommand LaunchEditorCommand { get; }
         public ICommand LoadFromFileCommand { get; }
         public ICommand AttachSelectedCommand { get; }
@@ -283,16 +285,22 @@ namespace BookShuffler.ViewModels
         private void SaveProject()
         {
             var projectPath = this.ProjectPath;
-            if (projectPath != null)
+            if (projectPath == null) return;
+            
+            Serializer.ClearData(projectPath);
+            
+            _projectRoot.Serialize(projectPath);
+            foreach (var entity in this.Unattached)
             {
-                _projectRoot.Serialize(projectPath);
-                var outputFile = System.IO.Path.Combine(projectPath, "project.yaml");
-                var serializer = new YamlDotNet.Serialization.Serializer();
-                File.WriteAllText(outputFile, serializer.Serialize(new ProjectInfo
-                {
-                    RootId = _projectRoot.Id,
-                }));
+                entity.Serialize(projectPath);
             }
+            
+            var outputFile = System.IO.Path.Combine(projectPath, "project.yaml");
+            var serializer = new YamlDotNet.Serialization.Serializer();
+            File.WriteAllText(outputFile, serializer.Serialize(new ProjectInfo
+            {
+                RootId = _projectRoot.Id,
+            }));
         }
 
         private void DetachSelected()
@@ -334,26 +342,31 @@ namespace BookShuffler.ViewModels
             return null;
         }
 
+        private void RemoveFromDetached(IEntityView target)
+        {
+            if (this.Unattached.Contains(target))
+            {
+                this.Unattached.Remove(target);
+            }
+            else
+            {
+                foreach (var entity in this.Unattached)
+                {
+                    var parent = this.BruteForceFindParent(target.Id, entity);
+                    if (parent is null) continue;
+                    parent.Entities.Remove(target);
+                    break;
+                }
+            }
+        }
+
         private void AttachSelected()
         {
             if (this.SelectedDetachedEntity is null) return;
             if (this.ActiveSection is null) return;
 
             var working = this.SelectedDetachedEntity;
-            if (this.Unattached.Contains(working))
-            {
-                this.Unattached.Remove(working);
-            }
-            else
-            {
-                foreach (var entity in this.Unattached)
-                {
-                    var parent = this.BruteForceFindParent(working.Id, entity);
-                    if (parent is null) continue;
-                    parent.Entities.Remove(working);
-                    break;
-                }
-            }
+            this.RemoveFromDetached(working);
             
             this.ActiveSection.Entities.Add(working);
             this.SelectedDetachedEntity = null;
@@ -391,12 +404,12 @@ namespace BookShuffler.ViewModels
         {
             if (_selectedEntity is SectionView)
             {
-                return Path.Combine(_projectPath, "sections", $"{_selectedEntity.Id}.yaml");
+                return Path.Combine(_projectPath, ProjectLoader.SectionFolderName, $"{_selectedEntity.Id}.yaml");
             }
             
             if (_selectedEntity is IndexCardView)
             {
-                return Path.Combine(_projectPath, "cards", $"{_selectedEntity.Id}.md");
+                return Path.Combine(_projectPath, ProjectLoader.CardFolderName, $"{_selectedEntity.Id}.md");
             }
 
             throw new ArgumentException($"No file known for type {_selectedEntity.GetType()}");
@@ -442,6 +455,13 @@ namespace BookShuffler.ViewModels
                 section.Summary = loaded.Summary;
                 section.Notes = loaded.Notes;
             }
+        }
+
+        private void DeleteSelected()
+        {
+            if (this.SelectedDetachedEntity is null) return;
+            this.RemoveFromDetached(this.SelectedDetachedEntity);
+            this.SelectedDetachedEntity = null;
         }
         
     }

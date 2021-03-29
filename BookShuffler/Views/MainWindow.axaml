@@ -129,6 +129,11 @@
                             <ContextMenu>
                                 <MenuItem Header="Attach Selected"
                                           Command="{Binding AttachSelectedCommand}" />
+                                
+                                <Separator />
+                                
+                                <MenuItem Header="Delete"
+                                          Command="{Binding DeleteEntityCommand}" />
                             </ContextMenu>
                         </TreeView.ContextMenu>
 

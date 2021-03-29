@@ -9,10 +9,10 @@ namespace BookShuffler.Parsing
     {
         public static void Serialize(this IEntityView entity, string projectPath)
         {
-            var sectionPath = Path.Combine(projectPath, "sections");
+            var sectionPath = Path.Combine(projectPath, ProjectLoader.SectionFolderName);
             if (!Directory.Exists(sectionPath)) Directory.CreateDirectory(sectionPath);
             
-            var cardPath = Path.Combine(projectPath, "cards");
+            var cardPath = Path.Combine(projectPath, ProjectLoader.CardFolderName);
             if (!Directory.Exists(cardPath)) Directory.CreateDirectory(cardPath);
             
             if (entity is SectionView section)
@@ -40,6 +40,15 @@ namespace BookShuffler.Parsing
             }
         }
 
+        public static void ClearData(string projectPath)
+        {
+            var sectionPath = Path.Combine(projectPath, ProjectLoader.SectionFolderName);
+            if (Directory.Exists(sectionPath)) Directory.Delete(sectionPath, true);
+            
+            var cardPath = Path.Combine(projectPath, ProjectLoader.CardFolderName);
+            if (Directory.Exists(cardPath)) Directory.Delete(cardPath, true);
+        }
+        
         public static SerializableSection LoadSection(string file)
         {
             var deserializer = new YamlDotNet.Serialization.Deserializer();
