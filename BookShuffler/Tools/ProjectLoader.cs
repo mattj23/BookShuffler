@@ -56,17 +56,6 @@ namespace BookShuffler.Parsing
             // Build the attached items
             result.Root = (SectionView) LoadEntity(info.RootId);
             
-            // Build the unattached cards
-            foreach (var card in _cards.Values)
-            {
-                if (!_builtCards.ContainsKey(card.Id))
-                {
-                    var viewModel = new IndexCardView(_cards[card.Id]);
-                    _builtCards[card.Id] = viewModel;
-                    result.Unattached.Add(viewModel);
-                }
-            }
-            
             // Build the unattached sections
             var remaining = _sectionReps.Keys.Where(k => !_builtSections.ContainsKey(k)).ToArray();
             while (remaining.Any())
@@ -84,6 +73,17 @@ namespace BookShuffler.Parsing
                 }
                 
                 remaining = _sectionReps.Keys.Where(k => !_builtSections.ContainsKey(k)).ToArray();
+            }
+            
+            // Build the unattached cards
+            foreach (var card in _cards.Values)
+            {
+                if (!_builtCards.ContainsKey(card.Id))
+                {
+                    var viewModel = new IndexCardView(_cards[card.Id]);
+                    _builtCards[card.Id] = viewModel;
+                    result.Unattached.Add(viewModel);
+                }
             }
             
             // Set the positions of everything

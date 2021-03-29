@@ -69,32 +69,69 @@
                 Margin="2"
                 MaxWidth="500"
                 BorderThickness="2">
-            <TreeView MinWidth="50"
-                      Items="{Binding RootItem}"
-                      SelectedItem="{Binding SelectedEntity}">
+            <TabControl>
+                <TabItem Header="Project Entities">
+
+                    <TreeView MinWidth="50"
+                              Items="{Binding RootItem}"
+                              SelectedItem="{Binding SelectedEntity}">
+
+                        <TreeView.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="Detach Selected"
+                                          Command="{Binding DetachSelectedCommand}" />
+                            </ContextMenu>
+                        </TreeView.ContextMenu>
+
+                        <TreeView.DataTemplates>
+                            <!-- Section View Template -->
+                            <TreeDataTemplate DataType="vm:SectionView"
+                                              ItemsSource="{Binding Entities}">
+                                <TextBlock Text="{Binding Summary}" />
+                            </TreeDataTemplate>
+
+                            <!-- Index Card View Template -->
+                            <TreeDataTemplate DataType="vm:IndexCardView">
+                                <TextBlock Text="{Binding Summary}" />
+                            </TreeDataTemplate>
+
+                        </TreeView.DataTemplates>
+
+                    </TreeView>
+
+                </TabItem>
                 
-                <TreeView.ContextMenu>
-                    <ContextMenu>
-                        <MenuItem Header="Detach Selected"
-                                  Command="{Binding DetachSelectedCommand}"/>
-                    </ContextMenu>
-                </TreeView.ContextMenu>
-                
-                <TreeView.DataTemplates>
-                    <!-- Section View Template -->
-                    <TreeDataTemplate DataType="vm:SectionView"
-                                      ItemsSource="{Binding Entities}">
-                        <TextBlock Text="{Binding Summary}" />
-                    </TreeDataTemplate>
+                <TabItem Header="Detached Entities">
 
-                    <!-- Index Card View Template -->
-                    <TreeDataTemplate DataType="vm:IndexCardView">
-                        <TextBlock Text="{Binding Summary}" />
-                    </TreeDataTemplate>
+                    <TreeView MinWidth="50"
+                              Items="{Binding Unattached}"
+                              SelectedItem="{Binding SelectedDetachedEntity}">
 
-                </TreeView.DataTemplates>
+                        <TreeView.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="Attach Selected"
+                                          Command="{Binding AttachSelectedCommand}" />
+                            </ContextMenu>
+                        </TreeView.ContextMenu>
 
-            </TreeView>
+                        <TreeView.DataTemplates>
+                            <!-- Section View Template -->
+                            <TreeDataTemplate DataType="vm:SectionView"
+                                              ItemsSource="{Binding Entities}">
+                                <TextBlock Text="{Binding Summary}" />
+                            </TreeDataTemplate>
+
+                            <!-- Index Card View Template -->
+                            <TreeDataTemplate DataType="vm:IndexCardView">
+                                <TextBlock Text="{Binding Summary}" />
+                            </TreeDataTemplate>
+
+                        </TreeView.DataTemplates>
+
+                    </TreeView>
+
+                </TabItem>
+            </TabControl>
         </Border>
 
         <!-- Layout Editor -->

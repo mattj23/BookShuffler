@@ -24,6 +24,7 @@ namespace BookShuffler.ViewModels
         private Rectangle _canvasBounds;
         private double _canvasTop;
         private double _canvasLeft;
+        private IEntityView? _selectedDetachedEntity;
 
         public AppViewModel()
         {
@@ -32,6 +33,7 @@ namespace BookShuffler.ViewModels
 
             this.SaveProjectCommand = ReactiveCommand.Create(this.SaveProject);
             this.DetachSelectedCommand = ReactiveCommand.Create(this.DetachSelected);
+            this.AttachSelectedCommand = ReactiveCommand.Create(this.AttachSelected);
             this.LoadSettings();
 
             if (File.Exists(this.Settings.LastOpenedProject))
@@ -45,6 +47,8 @@ namespace BookShuffler.ViewModels
         public ICommand SaveProjectCommand { get; }
         
         public ICommand DetachSelectedCommand { get; }
+        
+        public ICommand AttachSelectedCommand { get; }
         
         /// <summary>
         /// Gets a function which returns the canvas boundaries. This is necessary because binding OneWayToSource on
@@ -113,6 +117,12 @@ namespace BookShuffler.ViewModels
                     this.ActiveSection = _selectedEntity as SectionView;
                 }
             }
+        }
+
+        public IEntityView? SelectedDetachedEntity
+        {
+            get => _selectedDetachedEntity;
+            set => this.RaiseAndSetIfChanged(ref _selectedDetachedEntity, value);
         }
 
         public void LoadSettings()
@@ -290,6 +300,31 @@ namespace BookShuffler.ViewModels
             }
 
             return null;
+        }
+
+        private void AttachSelected()
+        {
+            if (this.SelectedDetachedEntity is null) return;
+            if (this.ActiveSection is null) return;
+
+            var working = this.SelectedDetachedEntity;
+            if (this.Unattached.Contains(working))
+            {
+                this.Unattached.Remove(working);
+            }
+            else
+            {
+                foreach (var entity in this.Unattached)
+                {
+                    var parent = this.BruteForceFindParent(working.Id, entity);
+                    if (parent is null) continue;
+                    parent.Entities.Remove(working);
+                    break;
+                }
+            }
+            
+            this.ActiveSection.Entities.Add(working);
+            this.SelectedDetachedEntity = null;
         }
         
     }
