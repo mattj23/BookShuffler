@@ -97,10 +97,10 @@ namespace BookShuffler.ViewModels
         /// The actively selected *SectionView* element, which is the last item in the project tree which was clicked
         /// on that was also a SectionView and not an IndexCardView
         /// </summary>
-        public SectionView ActiveSection
+        public SectionView? ActiveSection
         {
             get => _activeSection;
-            set => this.RaiseAndSetIfChanged(ref _activeSection, value);
+            private set => this.RaiseAndSetIfChanged(ref _activeSection, value);
         }
 
         /// <summary>
@@ -203,6 +203,11 @@ namespace BookShuffler.ViewModels
                 this.MergeLoadResult(parseResult);
             }
             
+        }
+
+        public void ResortActiveSection()
+        {
+            this.ActiveSection?.ResortOrder();
         }
 
         private void MergeLoadResult(ParseResult loaded)

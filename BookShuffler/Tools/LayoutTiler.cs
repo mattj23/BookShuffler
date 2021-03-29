@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using Avalonia;
 using Avalonia.Controls.Shapes;
 using BookShuffler.ViewModels;
@@ -30,6 +33,27 @@ namespace BookShuffler.Parsing
                 x += TileWidth + Spacing;
             }
         }
-        
+
+        public static void ResortOrder(this SectionView section)
+        {
+            var working = new List<IEntityView>(section.Entities);
+            section.Entities.Clear();
+
+            while (working.Any())
+            {
+                // Find topmost
+                var upperPosition = working.Min(e => e.Position.Y);
+                var row = working.Where(e => Math.Abs(e.Position.Y - upperPosition) < TileHeight / 2.0)
+                    .OrderBy(e => e.Position.X)
+                    .ToArray();
+
+                foreach (var e in row)
+                {
+                    section.Entities.Add(e);
+                    working.Remove(e);
+                }
+            }
+        }
     }
+    
 }

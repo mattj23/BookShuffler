@@ -104,7 +104,11 @@ namespace BookShuffler.Views
 
         private void InputElement_OnPointerReleased(object? sender, PointerReleasedEventArgs e)
         {
-            _selected = null;
+            if (_selected is not null)
+            {
+                _selected = null;
+                this.ViewModel.ResortActiveSection();
+            }
         }
 
         private async void NewProject_OnClick(object? sender, RoutedEventArgs e)
