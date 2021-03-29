@@ -175,5 +175,14 @@ namespace BookShuffler.Views
 
             this.ViewModel.OpenProject(result.First());
         }
+
+        private void Section_OnDoubleTapped(object? sender, RoutedEventArgs e)
+        {
+            var parent = (sender as TextBlock).Parent as TreeViewItem;
+            if (parent is not null)
+            {
+                parent.IsExpanded = !parent.IsExpanded;
+            }
+        }
     }
 }
