@@ -1,6 +1,6 @@
 using System;
 
-namespace BookShuffler.Parsing
+namespace BookShuffler.Models
 {
     public class ProjectInfo
     {

@@ -10,6 +10,8 @@ using Avalonia.Controls.Shapes;
 using BookShuffler.Models;
 using BookShuffler.Parsing;
 using ReactiveUI;
+using YamlDotNet.RepresentationModel;
+using Path = System.IO.Path;
 
 namespace BookShuffler.ViewModels
 {
@@ -29,7 +31,15 @@ namespace BookShuffler.ViewModels
             this.Unattached = new ObservableCollection<IEntityView>();
 
             this.SaveProjectCommand = ReactiveCommand.Create(this.SaveProject);
+            this.LoadSettings();
+
+            if (File.Exists(this.Settings.LastOpenedProject))
+            {
+                this.OpenProject(this.Settings.LastOpenedProject);
+            }
         }
+        
+        public AppSettings Settings { get; private set; }
         
         public ICommand SaveProjectCommand { get; }
         
@@ -62,12 +72,6 @@ namespace BookShuffler.ViewModels
                 this.RaisePropertyChanged(nameof(HasActiveProject));
                 this.RaisePropertyChanged(nameof(AppTitle));
             }
-        }
-
-        public Rectangle CanvasBounds
-        {
-            get => _canvasBounds;
-            set => this.RaiseAndSetIfChanged(ref _canvasBounds, value);
         }
 
         /// <summary>
@@ -108,6 +112,32 @@ namespace BookShuffler.ViewModels
             }
         }
 
+        public void LoadSettings()
+        {
+            var folder = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                "BookShuffler");
+            var filePath = System.IO.Path.Combine(folder, "settings.yaml");
+            if (!Directory.Exists(folder)) Directory.CreateDirectory(folder);
+            
+            if (File.Exists(filePath))
+            {
+                var des = new YamlDotNet.Serialization.Deserializer();
+                this.Settings = des.Deserialize<AppSettings>(File.ReadAllText(filePath));
+            }
+            else
+            {
+                this.Settings = new AppSettings();
+            }
+        }
+
+        public void SaveSettings()
+        {
+            var filePath = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                "BookShuffler", "settings.yaml");
+            var ser = new YamlDotNet.Serialization.Serializer();
+            File.WriteAllText(filePath, ser.Serialize(this.Settings));
+        }
+        
         /// <summary>
         /// Create a new project at the given project path
         /// </summary>
@@ -122,6 +152,30 @@ namespace BookShuffler.ViewModels
             };
             _projectRoot = new SectionView(model);
             this.RootItem.Add(_projectRoot);
+
+            this.Settings.LastOpenedProject = path;
+            this.SaveSettings();
+        }
+
+        public void OpenProject(string path)
+        {
+            this.RootItem.Clear();
+            this.Unattached.Clear();
+            
+            
+            var loader = new ProjectLoader();
+            var result = loader.Load(path);
+
+            _projectRoot = result.Root;
+            this.RootItem.Add(_projectRoot);
+            foreach (var unattached in result.Unattached)
+            {
+                this.Unattached.Add(unattached);
+            }
+
+            this.ProjectPath = new FileInfo(path).DirectoryName;
+            this.Settings.LastOpenedProject = path;
+            this.SaveSettings();
         }
 
         /// <summary>
@@ -195,5 +249,7 @@ namespace BookShuffler.ViewModels
                 }));
             }
         }
+        
+        
     }
 }

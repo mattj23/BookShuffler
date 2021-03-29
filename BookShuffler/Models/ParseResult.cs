@@ -1,8 +1,7 @@
 using System;
 using System.Collections.Generic;
-using BookShuffler.Models;
 
-namespace BookShuffler.Parsing
+namespace BookShuffler.Models
 {
     public class ParseResult
     {

@@ -1,5 +1,6 @@
 using System.Collections.Specialized;
 using System.IO;
+using BookShuffler.Models;
 using BookShuffler.ViewModels;
 
 namespace BookShuffler.Parsing

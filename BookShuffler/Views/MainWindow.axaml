@@ -42,7 +42,8 @@
               Grid.ColumnSpan="2">
             <MenuItem Header="Project">
                 <MenuItem Header="_New" Click="NewProject_OnClick" />
-                <MenuItem Header="_Open" />
+                <MenuItem Header="_Open"
+                          Click="OpenProject_OnClick"/>
                 <Separator />
                 <MenuItem Header="_Save"
                           Command="{Binding SaveProjectCommand}"

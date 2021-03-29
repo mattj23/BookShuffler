@@ -1,8 +1,7 @@
 using System;
 using System.Collections.Generic;
-using BookShuffler.Models;
 
-namespace BookShuffler.Parsing
+namespace BookShuffler.Models
 {
     public class SerializableSection
     {
@@ -22,6 +21,17 @@ namespace BookShuffler.Parsing
             public Guid Id { get; set; }
             public double X { get; set; }
             public double Y { get; set; }
+        }
+
+        public Entity ToEntity()
+        {
+            return new Entity
+            {
+                Id = this.Id,
+                Summary = this.Summary,
+                Notes = this.Notes,
+                Label = this.Label
+            };
         }
     }
     

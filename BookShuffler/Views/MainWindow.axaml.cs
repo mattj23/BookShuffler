@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia;
 using Avalonia.Controls;
@@ -147,6 +148,28 @@ namespace BookShuffler.Views
         private void AutoTile_OnClick(object? sender, RoutedEventArgs e)
         {
             this.ViewModel?.ActiveSection?.AutoTile(_layoutContainer.Bounds.Width);
+        }
+
+        private async void OpenProject_OnClick(object? sender, RoutedEventArgs e)
+        {
+            this.ViewModel.GetCanvasBounds = () => _layoutContainer.Bounds;
+            
+            var dialog = new OpenFileDialog
+            {
+                Directory = ViewModel.ProjectPath,
+                Title = "Select project.yaml File",
+                Filters = new List<FileDialogFilter>{new FileDialogFilter()
+                {
+                    Extensions = {"yml", "yaml"},
+                    Name = "Project YAML File"
+                }}
+            };
+
+            var result = await dialog.ShowAsync(this);
+
+            if (string.IsNullOrEmpty(result?.FirstOrDefault())) return;
+
+            this.ViewModel.OpenProject(result.First());
         }
     }
 }
