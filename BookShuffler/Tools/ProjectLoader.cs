@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Avalonia;
 using BookShuffler.Models;
 using BookShuffler.ViewModels;
 
@@ -80,6 +81,18 @@ namespace BookShuffler.Parsing
                 foreach (var id in orphans)
                 {
                     result.Unattached.Add(LoadEntity(id));
+                }
+            }
+            
+            // Set the positions of everything
+            foreach (var rep in _sectionReps.Values)
+            {
+                foreach (var child in rep.Children)
+                {
+                    var suspect = _builtSections[rep.Id].Entities
+                        .FirstOrDefault(x => x.Id == child.Id);
+                    if (suspect != null)
+                        suspect.Position = new Point(child.X, child.Y);
                 }
             }
             
