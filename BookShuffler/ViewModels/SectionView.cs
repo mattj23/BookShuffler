@@ -1,3 +1,4 @@
+using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using Avalonia;
@@ -10,6 +11,8 @@ namespace BookShuffler.ViewModels
     {
         private Point _position;
         private readonly Entity _model;
+        
+        public Guid Id => _model.Id;
 
         public SectionView(Entity model)
         {

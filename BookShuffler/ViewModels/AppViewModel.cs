@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows.Input;
@@ -25,9 +26,12 @@ namespace BookShuffler.ViewModels
         public AppViewModel()
         {
             this.RootItem = new ObservableCollection<IEntityView>();
-            this.CanvasTop = 0;
-            this.CanvasLeft = 0;
+            this.Unattached = new ObservableCollection<IEntityView>();
+
+            this.SaveProjectCommand = ReactiveCommand.Create(this.SaveProject);
         }
+        
+        public ICommand SaveProjectCommand { get; }
         
         /// <summary>
         /// Gets a function which returns the canvas boundaries. This is necessary because binding OneWayToSource on
@@ -35,19 +39,15 @@ namespace BookShuffler.ViewModels
         /// </summary>
         public Func<Rect> GetCanvasBounds { get; set; }
 
+        /// <summary>
+        /// Gets a collection that should contain only the single root element of the project.
+        /// </summary>
         public ObservableCollection<IEntityView> RootItem { get; }
-
-        public double CanvasTop
-        {
-            get => _canvasTop;
-            set => this.RaiseAndSetIfChanged(ref _canvasTop, value);
-        }
-
-        public double CanvasLeft
-        {
-            get => _canvasLeft;
-            set => this.RaiseAndSetIfChanged(ref _canvasLeft, value);
-        }
+        
+        /// <summary>
+        /// Gets a collection of all of the unattached entities in the project
+        /// </summary>
+        public ObservableCollection<IEntityView> Unattached { get; }
 
         /// <summary>
         /// Gets the path of the actively loaded project. The application also uses this to determine whether or not
@@ -179,6 +179,21 @@ namespace BookShuffler.ViewModels
             }
 
             return viewModel;
+        }
+
+        private void SaveProject()
+        {
+            var projectPath = this.ProjectPath;
+            if (projectPath != null)
+            {
+                _projectRoot.Serialize(projectPath);
+                var outputFile = System.IO.Path.Combine(projectPath, "project.yaml");
+                var serializer = new YamlDotNet.Serialization.Serializer();
+                File.WriteAllText(outputFile, serializer.Serialize(new ProjectInfo
+                {
+                    RootId = _projectRoot.Id,
+                }));
+            }
         }
     }
 }

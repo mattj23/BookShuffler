@@ -45,6 +45,7 @@
                 <MenuItem Header="_Open" />
                 <Separator />
                 <MenuItem Header="_Save"
+                          Command="{Binding SaveProjectCommand}"
                           IsEnabled="{Binding HasActiveProject}" />
                 <Separator />
                 <MenuItem Header="Import Tagged Markdown"

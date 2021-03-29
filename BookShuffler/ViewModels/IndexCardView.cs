@@ -1,3 +1,4 @@
+using System;
 using Avalonia;
 using BookShuffler.Models;
 using ReactiveUI;
@@ -7,11 +8,12 @@ namespace BookShuffler.ViewModels
     public class IndexCardView : ViewModelBase, IEntityView
     {
         private Point _position;
-        private readonly IndexCard _model;
+
+        public Guid Id => Model.Id;
 
         public IndexCardView(IndexCard model)
         {
-            _model = model;
+            Model = model;
         }
 
         public Point Position
@@ -22,47 +24,48 @@ namespace BookShuffler.ViewModels
         
         public string Summary
         {
-            get => _model.Summary;
+            get => Model.Summary;
             set
             {
-                if (_model.Summary == value) return;
-                _model.Summary = value;
+                if (Model.Summary == value) return;
+                Model.Summary = value;
                 this.RaisePropertyChanged();
             }
         }
         
         public string? Notes
         {
-            get => _model.Notes;
+            get => Model.Notes;
             set
             {
-                if (_model.Notes == value) return;
-                _model.Notes = value;
+                if (Model.Notes == value) return;
+                Model.Notes = value;
                 this.RaisePropertyChanged();
             }
         }
         
         public string Content
         {
-            get => _model.Content;
+            get => Model.Content;
             set
             {
-                if (_model.Content == value) return;
-                _model.Content = value;
+                if (Model.Content == value) return;
+                Model.Content = value;
                 this.RaisePropertyChanged();
             }
         }
         
         public WorkflowLabel Label
         {
-            get => _model.Label;
+            get => Model.Label;
             set
             {
-                if (_model.Label == value) return;
-                _model.Label = value;
+                if (Model.Label == value) return;
+                Model.Label = value;
                 this.RaisePropertyChanged();
             }
         }
 
+        public IndexCard Model { get; }
     }
 }
