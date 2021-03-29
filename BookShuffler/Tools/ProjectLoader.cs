@@ -59,7 +59,7 @@ namespace BookShuffler.Parsing
             // Build the unattached cards
             foreach (var card in _cards.Values)
             {
-                if (!_cards.ContainsKey(card.Id))
+                if (!_builtCards.ContainsKey(card.Id))
                 {
                     var viewModel = new IndexCardView(_cards[card.Id]);
                     _builtCards[card.Id] = viewModel;
@@ -82,6 +82,8 @@ namespace BookShuffler.Parsing
                 {
                     result.Unattached.Add(LoadEntity(id));
                 }
+                
+                remaining = _sectionReps.Keys.Where(k => !_builtSections.ContainsKey(k)).ToArray();
             }
             
             // Set the positions of everything

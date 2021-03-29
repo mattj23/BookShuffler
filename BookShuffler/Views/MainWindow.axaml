@@ -69,10 +69,17 @@
                 Margin="2"
                 MaxWidth="500"
                 BorderThickness="2">
-
             <TreeView MinWidth="50"
                       Items="{Binding RootItem}"
                       SelectedItem="{Binding SelectedEntity}">
+                
+                <TreeView.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="Detach Selected"
+                                  Command="{Binding DetachSelectedCommand}"/>
+                    </ContextMenu>
+                </TreeView.ContextMenu>
+                
                 <TreeView.DataTemplates>
                     <!-- Section View Template -->
                     <TreeDataTemplate DataType="vm:SectionView"

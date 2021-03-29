@@ -31,6 +31,7 @@ namespace BookShuffler.ViewModels
             this.Unattached = new ObservableCollection<IEntityView>();
 
             this.SaveProjectCommand = ReactiveCommand.Create(this.SaveProject);
+            this.DetachSelectedCommand = ReactiveCommand.Create(this.DetachSelected);
             this.LoadSettings();
 
             if (File.Exists(this.Settings.LastOpenedProject))
@@ -42,6 +43,8 @@ namespace BookShuffler.ViewModels
         public AppSettings Settings { get; private set; }
         
         public ICommand SaveProjectCommand { get; }
+        
+        public ICommand DetachSelectedCommand { get; }
         
         /// <summary>
         /// Gets a function which returns the canvas boundaries. This is necessary because binding OneWayToSource on
@@ -249,7 +252,45 @@ namespace BookShuffler.ViewModels
                 }));
             }
         }
-        
+
+        private void DetachSelected()
+        {
+            if (this.SelectedEntity is null) return;
+            if (this.SelectedEntity == _projectRoot) return;
+
+            var parent = this.BruteForceFindParent(this.SelectedEntity.Id, _projectRoot);
+
+            if (parent is not null)
+            {
+                parent.Entities.Remove(this.SelectedEntity);
+                this.Unattached.Add(this.SelectedEntity);
+                this.SelectedEntity = parent;
+            }
+        }
+
+        /// <summary>
+        /// Does what it says.  Not optimal, but will have to do for now.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        private SectionView? BruteForceFindParent(Guid id, IEntityView possible)
+        {
+            if (possible is IndexCardView) return null;
+
+            if (possible is SectionView sec)
+            {
+                foreach (var entity in sec.Entities)
+                {
+                    if (entity.Id == id) { return sec; }
+                    
+                    var parent = BruteForceFindParent(id, entity);
+                    if (parent is not null)
+                        return parent;
+                }
+            }
+
+            return null;
+        }
         
     }
 }
