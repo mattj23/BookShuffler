@@ -80,6 +80,23 @@
                             <ContextMenu>
                                 <MenuItem Header="Detach Selected"
                                           Command="{Binding DetachSelectedCommand}" />
+                                
+                                <Separator />
+                                
+                                <MenuItem Header="New Index Card"
+                                          Command="{Binding CreateCardCommand}" />
+                                
+                                <MenuItem Header="New Section"
+                                          Command="{Binding CreateSectionCommand}" />
+
+                                <Separator />
+                                
+                                <MenuItem Header="Open in Editor"
+                                          Command="{Binding LaunchEditorCommand}" />
+                                
+                                <MenuItem Header="Reload from File"
+                                          Command="{Binding LoadFromFileCommand}" />
+
                             </ContextMenu>
                         </TreeView.ContextMenu>
 
@@ -87,7 +104,8 @@
                             <!-- Section View Template -->
                             <TreeDataTemplate DataType="vm:SectionView"
                                               ItemsSource="{Binding Entities}">
-                                <TextBlock Text="{Binding Summary}" />
+                                <TextBlock Text="{Binding Summary}"
+                                           FontWeight="Bold" />
                             </TreeDataTemplate>
 
                             <!-- Index Card View Template -->
@@ -118,7 +136,8 @@
                             <!-- Section View Template -->
                             <TreeDataTemplate DataType="vm:SectionView"
                                               ItemsSource="{Binding Entities}">
-                                <TextBlock Text="{Binding Summary}" />
+                                <TextBlock Text="{Binding Summary}"
+                                           FontWeight="Bold"/>
                             </TreeDataTemplate>
 
                             <!-- Index Card View Template -->

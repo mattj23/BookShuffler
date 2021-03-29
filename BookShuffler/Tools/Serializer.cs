@@ -40,6 +40,26 @@ namespace BookShuffler.Parsing
             }
         }
 
+        public static SerializableSection LoadSection(string file)
+        {
+            var deserializer = new YamlDotNet.Serialization.Deserializer();
+            return deserializer.Deserialize<SerializableSection>(File.ReadAllText(file));
+        }
+
+        public static IndexCard? LoadIndexCard(string file)
+        {
+            var deserializer = new YamlDotNet.Serialization.Deserializer();
+            var text = File.ReadAllText(file);
+            var parts = text.Split("---", 3);
+
+            // TODO: should this be logged?
+            if (parts.Length < 3) return null;
+
+            var cardInfo = deserializer.Deserialize<IndexCard>(parts[1]);
+            cardInfo.Content = parts[2].Trim();
+            return cardInfo;
+        }
+
         public static SerializableSection ToSerializable(this SectionView section)
         {
             var output = new SerializableSection

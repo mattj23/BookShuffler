@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reactive.Subjects;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Input;
 using Avalonia;
@@ -26,14 +29,25 @@ namespace BookShuffler.ViewModels
         private double _canvasLeft;
         private IEntityView? _selectedDetachedEntity;
 
+        private readonly BehaviorSubject<bool> _selectedIsSectionSubject;
         public AppViewModel()
         {
+            _selectedIsSectionSubject = new BehaviorSubject<bool>(false);
+            
             this.RootItem = new ObservableCollection<IEntityView>();
             this.Unattached = new ObservableCollection<IEntityView>();
 
             this.SaveProjectCommand = ReactiveCommand.Create(this.SaveProject);
             this.DetachSelectedCommand = ReactiveCommand.Create(this.DetachSelected);
             this.AttachSelectedCommand = ReactiveCommand.Create(this.AttachSelected);
+            this.LaunchEditorCommand = ReactiveCommand.Create(this.LaunchEditorOnSelected);
+            this.LoadFromFileCommand = ReactiveCommand.Create(this.LoadSelectedFromFile);
+
+            this.CreateCardCommand =
+                ReactiveCommand.Create(this.AddCardToSelected, _selectedIsSectionSubject);
+            this.CreateSectionCommand =
+                ReactiveCommand.Create(this.AddSectionToSelected, _selectedIsSectionSubject);
+            
             this.LoadSettings();
 
             if (File.Exists(this.Settings.LastOpenedProject))
@@ -48,7 +62,11 @@ namespace BookShuffler.ViewModels
         
         public ICommand DetachSelectedCommand { get; }
         
+        public ICommand LaunchEditorCommand { get; }
+        public ICommand LoadFromFileCommand { get; }
         public ICommand AttachSelectedCommand { get; }
+        public ICommand CreateCardCommand { get; }
+        public ICommand CreateSectionCommand { get; }
         
         /// <summary>
         /// Gets a function which returns the canvas boundaries. This is necessary because binding OneWayToSource on
@@ -112,9 +130,17 @@ namespace BookShuffler.ViewModels
             set
             {
                 this.RaiseAndSetIfChanged(ref _selectedEntity, value);
-                if (_selectedEntity is SectionView)
+                _selectedIsSectionSubject.OnNext(_selectedEntity is SectionView);
+                if (_selectedEntity is null) return;
+                
+                if (_selectedEntity is SectionView view)
                 {
-                    this.ActiveSection = _selectedEntity as SectionView;
+                    this.ActiveSection = view;
+                }
+                else
+                {
+                    var parent = this.BruteForceFindParent(_selectedEntity.Id, _projectRoot);
+                    if (parent is not null) this.ActiveSection = parent;
                 }
             }
         }
@@ -123,32 +149,6 @@ namespace BookShuffler.ViewModels
         {
             get => _selectedDetachedEntity;
             set => this.RaiseAndSetIfChanged(ref _selectedDetachedEntity, value);
-        }
-
-        public void LoadSettings()
-        {
-            var folder = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                "BookShuffler");
-            var filePath = System.IO.Path.Combine(folder, "settings.yaml");
-            if (!Directory.Exists(folder)) Directory.CreateDirectory(folder);
-            
-            if (File.Exists(filePath))
-            {
-                var des = new YamlDotNet.Serialization.Deserializer();
-                this.Settings = des.Deserialize<AppSettings>(File.ReadAllText(filePath));
-            }
-            else
-            {
-                this.Settings = new AppSettings();
-            }
-        }
-
-        public void SaveSettings()
-        {
-            var filePath = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                "BookShuffler", "settings.yaml");
-            var ser = new YamlDotNet.Serialization.Serializer();
-            File.WriteAllText(filePath, ser.Serialize(this.Settings));
         }
         
         /// <summary>
@@ -165,6 +165,7 @@ namespace BookShuffler.ViewModels
             };
             _projectRoot = new SectionView(model);
             this.RootItem.Add(_projectRoot);
+            this.SelectedEntity = _projectRoot;
 
             this.Settings.LastOpenedProject = path;
             this.SaveSettings();
@@ -181,6 +182,7 @@ namespace BookShuffler.ViewModels
 
             _projectRoot = result.Root;
             this.RootItem.Add(_projectRoot);
+            this.SelectedEntity = _projectRoot;
             foreach (var unattached in result.Unattached)
             {
                 this.Unattached.Add(unattached);
@@ -210,6 +212,31 @@ namespace BookShuffler.ViewModels
             this.ActiveSection?.ResortOrder();
         }
 
+        private void LoadSettings()
+        {
+            var folder = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                "BookShuffler");
+            var filePath = System.IO.Path.Combine(folder, "settings.yaml");
+            if (!Directory.Exists(folder)) Directory.CreateDirectory(folder);
+            
+            if (File.Exists(filePath))
+            {
+                var des = new YamlDotNet.Serialization.Deserializer();
+                this.Settings = des.Deserialize<AppSettings>(File.ReadAllText(filePath));
+            }
+            else
+            {
+                this.Settings = new AppSettings();
+            }
+        }
+
+        private void SaveSettings()
+        {
+            var filePath = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                "BookShuffler", "settings.yaml");
+            var ser = new YamlDotNet.Serialization.Serializer();
+            File.WriteAllText(filePath, ser.Serialize(this.Settings));
+        }
         private void MergeLoadResult(ParseResult loaded)
         {
             // Load chapters and their entire descendant chain 
@@ -330,6 +357,91 @@ namespace BookShuffler.ViewModels
             
             this.ActiveSection.Entities.Add(working);
             this.SelectedDetachedEntity = null;
+        }
+
+        private void AddCardToSelected()
+        {
+            var card = new IndexCard
+            {
+                Id = Guid.NewGuid(),
+                Label = WorkflowLabel.ToDo,
+                Notes = string.Empty,
+                Summary = "Enter Card Summary",
+                Content = string.Empty
+            };
+            
+            this.ActiveSection?.Entities.Add(new IndexCardView(card));
+
+        }
+
+        private void AddSectionToSelected()
+        {
+            var entity = new Entity()
+            {
+                Id = Guid.NewGuid(),
+                Label = WorkflowLabel.ToDo,
+                Notes = string.Empty,
+                Summary = "Summary Description"
+            };
+
+            this.ActiveSection?.Entities.Add(new SectionView(entity));
+        }
+
+        private string SelectedEntityFile()
+        {
+            if (_selectedEntity is SectionView)
+            {
+                return Path.Combine(_projectPath, "sections", $"{_selectedEntity.Id}.yaml");
+            }
+            
+            if (_selectedEntity is IndexCardView)
+            {
+                return Path.Combine(_projectPath, "cards", $"{_selectedEntity.Id}.md");
+            }
+
+            throw new ArgumentException($"No file known for type {_selectedEntity.GetType()}");
+        }
+
+        private void LaunchEditorOnSelected()
+        {
+            if (_selectedEntity is not null)
+            {
+                var file = this.SelectedEntityFile();
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                {
+                    var process = new Process {StartInfo = {FileName = "xdg-open", Arguments = file}};
+                    process.Start();
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                {
+                    var process = new Process {StartInfo = {FileName = "open", Arguments = file}};
+                    process.Start();
+                }
+                else
+                {
+                    Process.Start(file);
+                }
+            }
+        }
+
+        private void LoadSelectedFromFile()
+        {
+            if (_selectedEntity is IndexCardView card)
+            {
+                var loaded = Serializer.LoadIndexCard(this.SelectedEntityFile());
+                card.Label = loaded.Label;
+                card.Summary = loaded.Summary;
+                card.Notes = loaded.Notes;
+                card.Content = loaded.Content;
+            }
+            
+            if (_selectedEntity is SectionView section)
+            {
+                var loaded = Serializer.LoadSection(this.SelectedEntityFile());
+                section.Label = loaded.Label;
+                section.Summary = loaded.Summary;
+                section.Notes = loaded.Notes;
+            }
         }
         
     }

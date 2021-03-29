@@ -36,20 +36,14 @@ namespace BookShuffler.Parsing
 
             foreach (var file in Directory.EnumerateFiles(cardPath))
             {
-                var text = File.ReadAllText(file);
-                var parts = text.Split("---", 3);
-
-                // TODO: should this be logged?
-                if (parts.Length < 3) continue;
-
-                var cardInfo = deserializer.Deserialize<IndexCard>(parts[1]);
-                cardInfo.Content = parts[2].Trim();
-                _cards[cardInfo.Id] = cardInfo;
+                var cardInfo = Serializer.LoadIndexCard(file);
+                if (cardInfo is not null)
+                    _cards[cardInfo.Id] = cardInfo;
             }
             
             foreach (var file in Directory.EnumerateFiles(sectionPath))
             {
-                var item = deserializer.Deserialize<SerializableSection>(File.ReadAllText(file));
+                var item = Serializer.LoadSection(file);
                 _sectionReps[item.Id] = item;
             }
             
