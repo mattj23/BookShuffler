@@ -15,15 +15,15 @@ namespace BookShuffler.Parsing
 
         private readonly Dictionary<Guid, IndexCard> _cards;
         private readonly Dictionary<Guid, SerializableSection> _sectionReps;
-        private readonly Dictionary<Guid, SectionView> _builtSections;
-        private readonly Dictionary<Guid, IndexCardView> _builtCards;
+        private readonly Dictionary<Guid, SectionViewModel> _builtSections;
+        private readonly Dictionary<Guid, IndexCardViewModel> _builtCards;
 
         public ProjectLoader()
         {
             _cards = new Dictionary<Guid, IndexCard>();
             _sectionReps = new Dictionary<Guid, SerializableSection>();
-            _builtCards = new Dictionary<Guid, IndexCardView>();
-            _builtSections = new Dictionary<Guid, SectionView>();
+            _builtCards = new Dictionary<Guid, IndexCardViewModel>();
+            _builtSections = new Dictionary<Guid, SectionViewModel>();
         }
         
         public LoadResult Load(string projectFilePath)
@@ -51,7 +51,7 @@ namespace BookShuffler.Parsing
             }
             
             // Build the attached items
-            result.Root = (SectionView) LoadEntity(info.RootId);
+            result.Root = (SectionViewModel) LoadEntity(info.RootId);
             
             // Build the unattached sections
             var remaining = _sectionReps.Keys.Where(k => !_builtSections.ContainsKey(k)).ToArray();
@@ -77,7 +77,7 @@ namespace BookShuffler.Parsing
             {
                 if (!_builtCards.ContainsKey(card.Id))
                 {
-                    var viewModel = new IndexCardView(_cards[card.Id]);
+                    var viewModel = new IndexCardViewModel(_cards[card.Id]);
                     _builtCards[card.Id] = viewModel;
                     result.Unattached.Add(viewModel);
                 }
@@ -98,18 +98,18 @@ namespace BookShuffler.Parsing
             return result;
         }
 
-        private IEntityView LoadEntity(Guid id)
+        private IEntityViewModel LoadEntity(Guid id)
         {
             if (_cards.ContainsKey(id))
             {
-                var viewModel = new IndexCardView(_cards[id]);
+                var viewModel = new IndexCardViewModel(_cards[id]);
                 _builtCards[id] = viewModel;
                 return viewModel;
             }
             
             if (_sectionReps.ContainsKey(id))
             {
-                var viewModel = new SectionView(_sectionReps[id].ToEntity());
+                var viewModel = new SectionViewModel(_sectionReps[id].ToEntity());
                 _builtSections[id] = viewModel;
 
                 foreach (var child in _sectionReps[id].Children)

@@ -7,7 +7,7 @@ namespace BookShuffler.Parsing
 {
     public static class Serializer
     {
-        public static void Serialize(this IEntityView entity, string projectPath)
+        public static void Serialize(this IEntityViewModel entity, string projectPath)
         {
             var sectionPath = Path.Combine(projectPath, ProjectLoader.SectionFolderName);
             if (!Directory.Exists(sectionPath)) Directory.CreateDirectory(sectionPath);
@@ -15,7 +15,7 @@ namespace BookShuffler.Parsing
             var cardPath = Path.Combine(projectPath, ProjectLoader.CardFolderName);
             if (!Directory.Exists(cardPath)) Directory.CreateDirectory(cardPath);
             
-            if (entity is SectionView section)
+            if (entity is SectionViewModel section)
             {
                 // Serialize this entity
                 var outputPath = Path.Combine(sectionPath, $"{entity.Id}.yaml");
@@ -29,7 +29,7 @@ namespace BookShuffler.Parsing
                     child.Serialize(projectPath);
                 }
             }
-            else if (entity is IndexCardView card)
+            else if (entity is IndexCardViewModel card)
             {
                 var outputPath = Path.Combine(cardPath, $"{entity.Id}.md");
 
@@ -69,7 +69,7 @@ namespace BookShuffler.Parsing
             return cardInfo;
         }
 
-        public static SerializableSection ToSerializable(this SectionView section)
+        public static SerializableSection ToSerializable(this SectionViewModel section)
         {
             var output = new SerializableSection
             {

@@ -7,25 +7,25 @@ using ReactiveUI;
 
 namespace BookShuffler.ViewModels
 {
-    public class SectionView : ViewModelBase, IEntityView
+    public class SectionViewModel : ViewModelBase, IEntityViewModel
     {
         private Point _position;
         private readonly Entity _model;
         
         public Guid Id => _model.Id;
 
-        public SectionView(Entity model)
+        public SectionViewModel(Entity model)
         {
             _model = model;
-            this.Entities = new ObservableCollection<IEntityView>();
+            this.Entities = new ObservableCollection<IEntityViewModel>();
         }
 
-        public SectionView()
+        public SectionViewModel()
         {
-            Entities = new ObservableCollection<IEntityView>();
+            Entities = new ObservableCollection<IEntityViewModel>();
         }
 
-        public ObservableCollection<IEntityView> Entities { get; }
+        public ObservableCollection<IEntityViewModel> Entities { get; }
         
         public Point Position
         {

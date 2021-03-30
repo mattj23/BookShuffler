@@ -7,11 +7,11 @@ namespace BookShuffler.Models
     {
         public LoadResult()
         {
-            Unattached = new List<IEntityView>();
+            Unattached = new List<IEntityViewModel>();
         }
         
-        public SectionView Root { get; set; }
+        public SectionViewModel Root { get; set; }
         
-        public List<IEntityView> Unattached { get; set; }
+        public List<IEntityViewModel> Unattached { get; set; }
     }
 }

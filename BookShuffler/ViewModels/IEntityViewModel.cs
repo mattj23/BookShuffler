@@ -4,7 +4,7 @@ using BookShuffler.Models;
 
 namespace BookShuffler.ViewModels
 {
-    public interface IEntityView
+    public interface IEntityViewModel
     {
         Guid Id { get; }
         Point Position { get; set; }

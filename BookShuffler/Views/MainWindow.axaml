@@ -125,7 +125,7 @@
 
                         <TreeView.DataTemplates>
                             <!-- Section View Template -->
-                            <TreeDataTemplate DataType="vm:SectionView"
+                            <TreeDataTemplate DataType="vm:SectionViewModel"
                                               ItemsSource="{Binding Entities}">
                                 <TextBlock Text="{Binding Summary}"
                                            DoubleTapped="Section_OnDoubleTapped"
@@ -133,7 +133,7 @@
                             </TreeDataTemplate>
 
                             <!-- Index Card View Template -->
-                            <TreeDataTemplate DataType="vm:IndexCardView">
+                            <TreeDataTemplate DataType="vm:IndexCardViewModel">
                                 <TextBlock Text="{Binding Summary}" />
                             </TreeDataTemplate>
 
@@ -163,7 +163,7 @@
 
                         <TreeView.DataTemplates>
                             <!-- Section View Template -->
-                            <TreeDataTemplate DataType="vm:SectionView"
+                            <TreeDataTemplate DataType="vm:SectionViewModel"
                                               ItemsSource="{Binding Entities}">
                                 <TextBlock Text="{Binding Summary}"
                                            DoubleTapped="Section_OnDoubleTapped"
@@ -171,7 +171,7 @@
                             </TreeDataTemplate>
 
                             <!-- Index Card View Template -->
-                            <TreeDataTemplate DataType="vm:IndexCardView">
+                            <TreeDataTemplate DataType="vm:IndexCardViewModel">
                                 <TextBlock Text="{Binding Summary}" />
                             </TreeDataTemplate>
 
@@ -220,6 +220,7 @@
                                 PointerPressed="InputElement_OnPointerPressed"
                                 PointerMoved="InputElement_OnPointerMoved"
                                 PointerReleased="InputElement_OnPointerReleased"
+                                DoubleTapped="InputElement_OnDoubleTapped"
                                 Padding="7"
                                 MaxWidth="400"
                                 MaxHeight="400"

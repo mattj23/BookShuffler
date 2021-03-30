@@ -5,13 +5,13 @@ using ReactiveUI;
 
 namespace BookShuffler.ViewModels
 {
-    public class IndexCardView : ViewModelBase, IEntityView
+    public class IndexCardViewModel : ViewModelBase, IEntityViewModel
     {
         private Point _position;
 
         public Guid Id => Model.Id;
 
-        public IndexCardView(IndexCard model)
+        public IndexCardViewModel(IndexCard model)
         {
             Model = model;
         }

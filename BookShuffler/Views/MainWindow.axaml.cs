@@ -19,7 +19,7 @@ namespace BookShuffler.Views
 {
     public class MainWindow : Window
     {
-        private IEntityView? _selected;
+        private IEntityViewModel? _selected;
         private Point _clickPoint;
         private Point _dragStart;
         private bool _isPanning = false;
@@ -34,8 +34,6 @@ namespace BookShuffler.Views
             this.AttachDevTools();
 #endif
         }
-        
-        public ICommand CreateNewProjectCommand { get; }
         
         private AppViewModel? ViewModel => this.DataContext as AppViewModel;
 
@@ -77,7 +75,7 @@ namespace BookShuffler.Views
         private void InputElement_OnPointerPressed(object? sender, PointerPressedEventArgs e)
         {
             var pointer = e.GetCurrentPoint(_layoutContainer);
-            if ((sender as Border)?.Tag is IEntityView box && pointer.Properties.IsLeftButtonPressed)
+            if ((sender as Border)?.Tag is IEntityViewModel box && pointer.Properties.IsLeftButtonPressed)
             {
                 _selected = box;
                 _selectedBorder = sender as Border;
@@ -183,6 +181,19 @@ namespace BookShuffler.Views
             {
                 parent.IsExpanded = !parent.IsExpanded;
             }
+        }
+
+        private void InputElement_OnDoubleTapped(object? sender, RoutedEventArgs e)
+        {
+            if ((sender as Border).Tag is IEntityViewModel entity)
+            {
+                this.ViewModel.SelectedEntity = entity;
+                if ((sender as Border).Parent is TreeViewItem item)
+                {
+                    item.IsExpanded = true;
+                }
+            }
+            
         }
     }
 }

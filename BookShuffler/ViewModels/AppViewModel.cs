@@ -22,12 +22,12 @@ namespace BookShuffler.ViewModels
     public class AppViewModel : ViewModelBase
     {
         private string? _projectPath;
-        private SectionView _projectRoot;
-        private SectionView _activeSection;
-        private IEntityView? _selectedEntity;
+        private SectionViewModel _projectRoot;
+        private SectionViewModel _activeSection;
+        private IEntityViewModel? _selectedEntity;
         private double _canvasTop;
         private double _canvasLeft;
-        private IEntityView? _selectedDetachedEntity;
+        private IEntityViewModel? _selectedDetachedEntity;
 
         private readonly BehaviorSubject<bool> _selectedIsSectionSubject;
         private double _canvasScale;
@@ -37,8 +37,8 @@ namespace BookShuffler.ViewModels
         {
             _selectedIsSectionSubject = new BehaviorSubject<bool>(false);
             
-            this.RootItem = new ObservableCollection<IEntityView>();
-            this.Unattached = new ObservableCollection<IEntityView>();
+            this.RootItem = new ObservableCollection<IEntityViewModel>();
+            this.Unattached = new ObservableCollection<IEntityViewModel>();
 
             this.SaveProjectCommand = ReactiveCommand.Create(this.SaveProject);
             this.DetachSelectedCommand = ReactiveCommand.Create(this.DetachSelected);
@@ -103,12 +103,12 @@ namespace BookShuffler.ViewModels
         /// <summary>
         /// Gets a collection that should contain only the single root element of the project.
         /// </summary>
-        public ObservableCollection<IEntityView> RootItem { get; }
+        public ObservableCollection<IEntityViewModel> RootItem { get; }
         
         /// <summary>
         /// Gets a collection of all of the unattached entities in the project
         /// </summary>
-        public ObservableCollection<IEntityView> Unattached { get; }
+        public ObservableCollection<IEntityViewModel> Unattached { get; }
 
         /// <summary>
         /// Gets the path of the actively loaded project. The application also uses this to determine whether or not
@@ -141,7 +141,7 @@ namespace BookShuffler.ViewModels
         /// The actively selected *SectionView* element, which is the last item in the project tree which was clicked
         /// on that was also a SectionView and not an IndexCardView
         /// </summary>
-        public SectionView? ActiveSection
+        public SectionViewModel? ActiveSection
         {
             get => _activeSection;
             private set => this.RaiseAndSetIfChanged(ref _activeSection, value);
@@ -150,16 +150,16 @@ namespace BookShuffler.ViewModels
         /// <summary>
         /// The IEntityView selected in the project tree view
         /// </summary>
-        public IEntityView? SelectedEntity
+        public IEntityViewModel? SelectedEntity
         {
             get => _selectedEntity;
             set
             {
                 this.RaiseAndSetIfChanged(ref _selectedEntity, value);
-                _selectedIsSectionSubject.OnNext(_selectedEntity is SectionView);
+                _selectedIsSectionSubject.OnNext(_selectedEntity is SectionViewModel);
                 if (_selectedEntity is null) return;
                 
-                if (_selectedEntity is SectionView view)
+                if (_selectedEntity is SectionViewModel view)
                 {
                     this.ActiveSection = view;
                 }
@@ -171,7 +171,7 @@ namespace BookShuffler.ViewModels
             }
         }
 
-        public IEntityView? SelectedDetachedEntity
+        public IEntityViewModel? SelectedDetachedEntity
         {
             get => _selectedDetachedEntity;
             set => this.RaiseAndSetIfChanged(ref _selectedDetachedEntity, value);
@@ -189,7 +189,7 @@ namespace BookShuffler.ViewModels
                 Id = Guid.NewGuid(),
                 Summary = "Project Root"
             };
-            _projectRoot = new SectionView(model);
+            _projectRoot = new SectionViewModel(model);
             this.RootItem.Add(_projectRoot);
             this.SelectedEntity = _projectRoot;
 
@@ -281,9 +281,9 @@ namespace BookShuffler.ViewModels
            }
         }
 
-        private SectionView LoadRecursive(SectionEntity raw, ParseResult loaded)
+        private SectionViewModel LoadRecursive(SectionEntity raw, ParseResult loaded)
         {
-            var viewModel = new SectionView(raw);
+            var viewModel = new SectionViewModel(raw);
             foreach (var id in raw.Children)
             {
                 var sectionChild = loaded.Sections.FirstOrDefault(s => s.Id == id);
@@ -298,7 +298,7 @@ namespace BookShuffler.ViewModels
                 var cardChild = loaded.Cards.FirstOrDefault(c => c.Id == id);
                 if (cardChild != null)
                 {
-                    viewModel.Entities.Add(new IndexCardView(cardChild));
+                    viewModel.Entities.Add(new IndexCardViewModel(cardChild));
                 }
 
             }
@@ -347,11 +347,11 @@ namespace BookShuffler.ViewModels
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        private SectionView? BruteForceFindParent(Guid id, IEntityView possible)
+        private SectionViewModel? BruteForceFindParent(Guid id, IEntityViewModel possible)
         {
-            if (possible is IndexCardView) return null;
+            if (possible is IndexCardViewModel) return null;
 
-            if (possible is SectionView sec)
+            if (possible is SectionViewModel sec)
             {
                 foreach (var entity in sec.Entities)
                 {
@@ -366,7 +366,7 @@ namespace BookShuffler.ViewModels
             return null;
         }
 
-        private void RemoveFromDetached(IEntityView target)
+        private void RemoveFromDetached(IEntityViewModel target)
         {
             if (this.Unattached.Contains(target))
             {
@@ -407,7 +407,7 @@ namespace BookShuffler.ViewModels
                 Content = string.Empty
             };
             
-            this.ActiveSection?.Entities.Add(new IndexCardView(card));
+            this.ActiveSection?.Entities.Add(new IndexCardViewModel(card));
 
         }
 
@@ -421,17 +421,17 @@ namespace BookShuffler.ViewModels
                 Summary = "Summary Description"
             };
 
-            this.ActiveSection?.Entities.Add(new SectionView(entity));
+            this.ActiveSection?.Entities.Add(new SectionViewModel(entity));
         }
 
         private string SelectedEntityFile()
         {
-            if (_selectedEntity is SectionView)
+            if (_selectedEntity is SectionViewModel)
             {
                 return Path.Combine(_projectPath, ProjectLoader.SectionFolderName, $"{_selectedEntity.Id}.yaml");
             }
             
-            if (_selectedEntity is IndexCardView)
+            if (_selectedEntity is IndexCardViewModel)
             {
                 return Path.Combine(_projectPath, ProjectLoader.CardFolderName, $"{_selectedEntity.Id}.md");
             }
@@ -463,7 +463,7 @@ namespace BookShuffler.ViewModels
 
         private void LoadSelectedFromFile()
         {
-            if (_selectedEntity is IndexCardView card)
+            if (_selectedEntity is IndexCardViewModel card)
             {
                 var loaded = Serializer.LoadIndexCard(this.SelectedEntityFile());
                 card.Label = loaded.Label;
@@ -472,7 +472,7 @@ namespace BookShuffler.ViewModels
                 card.Content = loaded.Content;
             }
             
-            if (_selectedEntity is SectionView section)
+            if (_selectedEntity is SectionViewModel section)
             {
                 var loaded = Serializer.LoadSection(this.SelectedEntityFile());
                 section.Label = loaded.Label;

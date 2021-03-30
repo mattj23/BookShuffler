@@ -16,7 +16,7 @@ namespace BookShuffler.Parsing
         private const double TileHeight = 400;
         private const double Spacing = 20;
 
-        public static void AutoTile(this SectionView section, double width)
+        public static void AutoTile(this SectionViewModel section, double width)
         {
             // Assumes that the size of each tile is 400x400
             double x = Spacing;
@@ -34,9 +34,9 @@ namespace BookShuffler.Parsing
             }
         }
 
-        public static void ResortOrder(this SectionView section)
+        public static void ResortOrder(this SectionViewModel section)
         {
-            var working = new List<IEntityView>(section.Entities);
+            var working = new List<IEntityViewModel>(section.Entities);
             section.Entities.Clear();
 
             while (working.Any())
