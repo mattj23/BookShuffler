@@ -95,6 +95,8 @@ namespace BookShuffler.Parsing
                 }
             }
             
+            result.AllEntities.AddRange(_builtCards.Values);
+            result.AllEntities.AddRange(_builtSections.Values);
             return result;
         }
 
