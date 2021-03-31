@@ -79,6 +79,11 @@ namespace BookShuffler.Views
                 _dragStart = viewModel.Position;
                 
                 this.ViewModel?.ActiveSection?.BringChildToFront(_selected);
+
+                if (viewModel is IndexCardViewModel card)
+                {
+                    this.ViewModel.SelectedEntity = card;
+                }
             }
 
             e.Handled = true;
