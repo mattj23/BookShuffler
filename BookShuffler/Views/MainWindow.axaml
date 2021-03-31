@@ -8,6 +8,7 @@
         x:Class="BookShuffler.Views.MainWindow"
         Icon="/Assets/avalonia-logo.ico"
         x:Name="MainWindow"
+        Closing="Window_OnClosing"
         Title="{Binding AppTitle}">
 
     <Design.DataContext>

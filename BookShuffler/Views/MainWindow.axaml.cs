@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
@@ -8,6 +9,7 @@ using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using BookShuffler.Parsing;
 using BookShuffler.ViewModels;
+using MessageBox.Avalonia.Enums;
 
 namespace BookShuffler.Views
 {
@@ -19,6 +21,7 @@ namespace BookShuffler.Views
         private bool _isPanning;
         private ItemsControl _layoutContainer;
         private EntityView? _selectedEntityView;
+        private bool _forceClose;
         
         public MainWindow()
         {
@@ -185,5 +188,25 @@ namespace BookShuffler.Views
             }
         }
 
+        private async void Window_OnClosing(object? sender, CancelEventArgs e)
+        {
+            if (_forceClose || this.ViewModel?.HasUnsavedChanges != true) return;
+            
+            // This is arranged in this way because Avalonia does not wait for this to complete as an asynchronous
+            // method and will not accept async Task as a method signature. Thus when reaching the await the window
+            // will close anyway unless we interrupt it.
+            e.Cancel = true;
+                
+            var dialog = MessageBox.Avalonia.MessageBoxManager
+                .GetMessageBoxStandardWindow("Unsaved Changes",
+                    "You have unsaved changes, are you sure you want to exit?", ButtonEnum.OkCancel);
+            var result = await dialog.ShowDialog(this);
+
+            if (result == ButtonResult.Ok)
+            {
+                _forceClose = true;
+                this.Close();
+            }
+        }
     }
 }
