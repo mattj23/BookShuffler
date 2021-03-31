@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Xml.XPath;
 using BookShuffler.Models;
 using BookShuffler.Tools;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -129,6 +130,23 @@ namespace BookShuffler.ViewModels
             foreach (var entity in loaded.Unattached) DetachedEntities.Add(entity);
         }
 
+        public void DetachEntity(IEntityViewModel entity)
+        {
+            if (!_allEntities.ContainsKey(entity.Id)) throw new ArgumentException("Entity isn't part of this project");
+
+            var parent = this.BruteForceFindParent(entity.Id, this.Root);
+            if (parent is null) throw new ArgumentException("Could not find parent of entity");
+
+            parent.Entities.Remove(entity);
+            this.DetachedEntities.Add(entity);
+        }
+
+        /// <summary>
+        /// Registers an entity to the project which the project does not currently have. This subscribes to
+        /// change notifications (for detecting unsaved changes) and attaches the project categories to any
+        /// index cards.
+        /// </summary>
+        /// <param name="viewModel"></param>
         private void RegisterEntity(IEntityViewModel viewModel)
         {
             if (viewModel is IndexCardViewModel cardViewModel)
@@ -142,6 +160,33 @@ namespace BookShuffler.ViewModels
                 .Subscribe(_ => this.HasUnsavedChanges = true));
             _entitySubscriptions.Add(viewModel.WhenAnyValue(e => e.Position)
                 .Subscribe(_ => this.HasUnsavedChanges = true));
+        }
+
+        /// <summary>
+        /// Does what it says.  Not optimal, but will have to do for now.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        private SectionViewModel? BruteForceFindParent(Guid id, IEntityViewModel possible)
+        {
+            if (possible is IndexCardViewModel) return null;
+
+            if (possible is SectionViewModel sec)
+            {
+                foreach (var entity in sec.Entities)
+                {
+                    if (entity.Id == id)
+                    {
+                        return sec;
+                    }
+
+                    var parent = BruteForceFindParent(id, entity);
+                    if (parent is not null)
+                        return parent;
+                }
+            }
+
+            return null;
         }
 
         public void Dispose()

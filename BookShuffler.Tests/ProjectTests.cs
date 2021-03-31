@@ -77,5 +77,14 @@ namespace BookShuffler.Tests
             Assert.Equal("Default", c3.Category.Name);
 
         }
+
+        [Fact]
+        public void DetachItems()
+        {
+            Project.DetachEntity(S0);
+
+            Assert.DoesNotContain(S0, Project.Root.Entities);
+            Assert.Contains(S0, Project.DetachedEntities);
+        }
     }
 }

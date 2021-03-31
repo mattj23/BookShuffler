@@ -194,8 +194,8 @@ namespace BookShuffler.ViewModels
                 else
                 {
                     // Otherwise this is an index card
-                    var parent = this.BruteForceFindParent(_selectedEntity.Id, _projectRoot);
-                    if (parent is not null) this.ActiveSection = parent;
+                    // var parent = this.BruteForceFindParent(_selectedEntity.Id, _projectRoot);
+                    // if (parent is not null) this.ActiveSection = parent;
                     this.ActiveSection?.BringChildToFront(_selectedEntity);
                 }
             }
@@ -266,59 +266,32 @@ namespace BookShuffler.ViewModels
             if (this.SelectedEntity is null) return;
             if (this.SelectedEntity == _projectRoot) return;
 
-            var parent = this.BruteForceFindParent(this.SelectedEntity.Id, _projectRoot);
+            // var parent = this.BruteForceFindParent(this.SelectedEntity.Id, _projectRoot);
 
-            if (parent is not null)
-            {
-                parent.Entities.Remove(this.SelectedEntity);
-                this.Unattached.Add(this.SelectedEntity);
-                this.SelectedEntity = parent;
-            }
-        }
-
-        /// <summary>
-        /// Does what it says.  Not optimal, but will have to do for now.
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        private SectionViewModel? BruteForceFindParent(Guid id, IEntityViewModel possible)
-        {
-            if (possible is IndexCardViewModel) return null;
-
-            if (possible is SectionViewModel sec)
-            {
-                foreach (var entity in sec.Entities)
-                {
-                    if (entity.Id == id)
-                    {
-                        return sec;
-                    }
-
-                    var parent = BruteForceFindParent(id, entity);
-                    if (parent is not null)
-                        return parent;
-                }
-            }
-
-            return null;
+            // if (parent is not null)
+            // {
+            //     parent.Entities.Remove(this.SelectedEntity);
+            //     this.Unattached.Add(this.SelectedEntity);
+            //     this.SelectedEntity = parent;
+            // }
         }
 
         private void RemoveFromDetached(IEntityViewModel target)
         {
-            if (this.Unattached.Contains(target))
-            {
-                this.Unattached.Remove(target);
-            }
-            else
-            {
-                foreach (var entity in this.Unattached)
-                {
-                    var parent = this.BruteForceFindParent(target.Id, entity);
-                    if (parent is null) continue;
-                    parent.Entities.Remove(target);
-                    break;
-                }
-            }
+            // if (this.Unattached.Contains(target))
+            // {
+            //     this.Unattached.Remove(target);
+            // }
+            // else
+            // {
+            //     foreach (var entity in this.Unattached)
+            //     {
+            //         var parent = this.BruteForceFindParent(target.Id, entity);
+            //         if (parent is null) continue;
+            //         parent.Entities.Remove(target);
+            //         break;
+            //     }
+            // }
         }
 
         private void AttachSelected()
