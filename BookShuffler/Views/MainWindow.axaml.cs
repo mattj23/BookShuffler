@@ -1,19 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using System.Windows.Input;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
-using Avalonia.LogicalTree;
 using Avalonia.Markup.Xaml;
-using Avalonia.Media;
 using BookShuffler.Parsing;
 using BookShuffler.ViewModels;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using ReactiveUI;
 
 namespace BookShuffler.Views
 {
@@ -22,9 +16,9 @@ namespace BookShuffler.Views
         private IEntityViewModel? _selected;
         private Point _clickPoint;
         private Point _dragStart;
-        private bool _isPanning = false;
+        private bool _isPanning;
         private ItemsControl _layoutContainer;
-        private Border? _selectedBorder;
+        private EntityView? _selectedEntityView;
         
         public MainWindow()
         {
@@ -45,7 +39,7 @@ namespace BookShuffler.Views
 
         private void LayoutContainer_OnPointerPressed(object? sender, PointerPressedEventArgs e)
         {
-            var pointer = e.GetCurrentPoint(_layoutContainer);
+            var pointer = e.GetCurrentPoint(this);
             if (pointer.Properties.IsLeftButtonPressed)
             {
                 _dragStart = pointer.Position;
@@ -57,9 +51,11 @@ namespace BookShuffler.Views
         {
             if (_isPanning & this.ViewModel != null)
             {
-                var pointer = e.GetCurrentPoint(_layoutContainer);
+                var pointer = e.GetCurrentPoint(this);
                 var shift = pointer.Position - _dragStart;
                 _dragStart = pointer.Position;
+                // this.ViewModel.ActiveSection.ViewShiftX += shift.X;
+                // this.ViewModel.ActiveSection.ViewShiftY += shift.Y;
                 foreach (var entity in this.ViewModel.ActiveSection.Entities)
                 {
                     entity.Position += shift;
@@ -75,12 +71,14 @@ namespace BookShuffler.Views
         private void InputElement_OnPointerPressed(object? sender, PointerPressedEventArgs e)
         {
             var pointer = e.GetCurrentPoint(_layoutContainer);
-            if ((sender as Border)?.Tag is IEntityViewModel box && pointer.Properties.IsLeftButtonPressed)
+            if ((sender as EntityView)?.DataContext is IEntityViewModel viewModel && pointer.Properties.IsLeftButtonPressed)
             {
-                _selected = box;
-                _selectedBorder = sender as Border;
+                _selected = viewModel;
+                _selectedEntityView = sender as EntityView;
                 _clickPoint = pointer.Position;
-                _dragStart = box.Position;
+                _dragStart = viewModel.Position;
+                
+                this.ViewModel?.ActiveSection?.BringChildToFront(_selected);
             }
 
             e.Handled = true;
@@ -93,8 +91,8 @@ namespace BookShuffler.Views
             {
                 var (x, y) = pointer.Position - _clickPoint + _dragStart;
 
-                _selected.Position = new Point(Math.Min(Math.Max(0, x), _layoutContainer.Bounds.Width - _selectedBorder.Bounds.Width),
-                    Math.Min(Math.Max(0, y), _layoutContainer.Bounds.Height - _selectedBorder.Bounds.Height));
+                _selected.Position = new Point(Math.Min(Math.Max(0, x), _layoutContainer.Bounds.Width - _selectedEntityView.Bounds.Width),
+                    Math.Min(Math.Max(0, y), _layoutContainer.Bounds.Height - _selectedEntityView.Bounds.Height));
             }
 
             e.Handled = true;
@@ -160,7 +158,7 @@ namespace BookShuffler.Views
             {
                 Directory = ViewModel.ProjectPath,
                 Title = "Select project.yaml File",
-                Filters = new List<FileDialogFilter>{new FileDialogFilter()
+                Filters = new List<FileDialogFilter>{new()
                 {
                     Extensions = {"yml", "yaml"},
                     Name = "Project YAML File"
@@ -176,24 +174,11 @@ namespace BookShuffler.Views
 
         private void Section_OnDoubleTapped(object? sender, RoutedEventArgs e)
         {
-            var parent = (sender as TextBlock).Parent as TreeViewItem;
-            if (parent is not null)
+            if ((sender as Control)?.Parent is TreeViewItem parent)
             {
                 parent.IsExpanded = !parent.IsExpanded;
             }
         }
 
-        private void InputElement_OnDoubleTapped(object? sender, RoutedEventArgs e)
-        {
-            if ((sender as Border).Tag is IEntityViewModel entity)
-            {
-                this.ViewModel.SelectedEntity = entity;
-                if ((sender as Border).Parent is TreeViewItem item)
-                {
-                    item.IsExpanded = true;
-                }
-            }
-            
-        }
     }
 }

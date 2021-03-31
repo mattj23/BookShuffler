@@ -8,12 +8,19 @@ namespace BookShuffler.ViewModels
     public class IndexCardViewModel : ViewModelBase, IEntityViewModel
     {
         private Point _position;
+        private int _z;
 
         public Guid Id => Model.Id;
 
         public IndexCardViewModel(IndexCard model)
         {
             Model = model;
+        }
+
+        public int Z
+        {
+            get => _z;
+            set => this.RaiseAndSetIfChanged(ref _z, value);
         }
 
         public Point Position

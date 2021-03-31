@@ -11,8 +11,9 @@ namespace BookShuffler.ViewModels
     {
         private Point _position;
         private readonly Entity _model;
-        
-        public Guid Id => _model.Id;
+        private double _viewShiftX;
+        private double _viewShiftY;
+        private int _z;
 
         public SectionViewModel(Entity model)
         {
@@ -20,11 +21,26 @@ namespace BookShuffler.ViewModels
             this.Entities = new ObservableCollection<IEntityViewModel>();
         }
 
-        public SectionViewModel()
+        public double ViewShiftX
         {
-            Entities = new ObservableCollection<IEntityViewModel>();
+            get => _viewShiftX;
+            set => this.RaiseAndSetIfChanged(ref _viewShiftX, value);
         }
 
+        public double ViewShiftY
+        {
+            get => _viewShiftY;
+            set => this.RaiseAndSetIfChanged(ref _viewShiftY, value);
+        }
+
+        public int Z
+        {
+            get => _z;
+            set => this.RaiseAndSetIfChanged(ref _z, value);
+        }
+        
+        public Guid Id => _model.Id;
+        
         public ObservableCollection<IEntityViewModel> Entities { get; }
         
         public Point Position
@@ -67,5 +83,16 @@ namespace BookShuffler.ViewModels
         }
 
         public string Content => string.Join("\n", this.Entities.Select(x => x.Summary));
+
+        public void BringChildToFront(IEntityViewModel child)
+        {
+            var oldZ = child.Z;
+            foreach (var entity in Entities)
+            {
+                if (entity.Z >= oldZ) entity.Z -= 1;
+            }
+
+            child.Z = Entities.Max(e => e.Z) + 1;
+        }
     }
 }

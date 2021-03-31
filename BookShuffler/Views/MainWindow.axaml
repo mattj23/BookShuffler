@@ -3,6 +3,7 @@
         xmlns:vm="using:BookShuffler.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:views="clr-namespace:BookShuffler.Views"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="BookShuffler.Views.MainWindow"
         Icon="/Assets/avalonia-logo.ico"
@@ -16,6 +17,7 @@
         <Style Selector="ItemsControl > ContentPresenter">
             <Setter Property="Canvas.Left" Value="{Binding Position.X}"/>
             <Setter Property="Canvas.Top" Value="{Binding Position.Y}"/>
+            <Setter Property="Canvas.ZIndex" Value="{Binding Z}"/>
       
             <Setter Property="Transitions">                            
                 <Transitions>
@@ -196,8 +198,12 @@
             
             <LayoutTransformControl>
                 <LayoutTransformControl.LayoutTransform>
+                    <TransformGroup>
                     <ScaleTransform ScaleX="{Binding CanvasScale}"
                                     ScaleY="{Binding CanvasScale}" />
+                    <TranslateTransform X="{Binding ActiveSection.ViewShiftX}" 
+                                        Y="{Binding ActiveSection.ViewShiftY}" />    
+                    </TransformGroup>
                 </LayoutTransformControl.LayoutTransform>
                 
                 <ItemsControl x:Name="LayoutContainer"
@@ -213,46 +219,10 @@
 
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <!-- Content Template -->
-                        <Border BorderBrush="Black"
-                                CornerRadius="5"
-                                BorderThickness="2"
-                                PointerPressed="InputElement_OnPointerPressed"
-                                PointerMoved="InputElement_OnPointerMoved"
-                                PointerReleased="InputElement_OnPointerReleased"
-                                DoubleTapped="InputElement_OnDoubleTapped"
-                                Padding="7"
-                                MaxWidth="400"
-                                MaxHeight="400"
-                                Background="WhiteSmoke"
-                                Tag="{Binding}">
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                </Grid.RowDefinitions>
-
-                                <TextBlock Grid.Row="0"
-                                           TextWrapping="Wrap"
-                                           FontWeight="Bold"
-                                           Margin="3"
-                                           Text="{Binding Summary}" />
-
-                                <Separator Grid.Row="1"
-                                           BorderBrush="DarkGray"
-                                           BorderThickness="1" />
-
-                                <ScrollViewer Grid.Row="2"
-                                              MaxHeight="300"
-                                              HorizontalScrollBarVisibility="Disabled"
-                                              VerticalScrollBarVisibility="Auto">
-                                    <TextBlock Text="{Binding Content}"
-                                               Margin="5"
-                                               TextWrapping="Wrap" />
-                                </ScrollViewer>
-                            </Grid>
-                        </Border>
+                        <views:EntityView PointerPressed="InputElement_OnPointerPressed"
+                                          PointerMoved="InputElement_OnPointerMoved"
+                                          PointerReleased="InputElement_OnPointerReleased"
+                                          DataContext="{Binding}" />
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
 

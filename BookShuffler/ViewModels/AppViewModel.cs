@@ -161,12 +161,16 @@ namespace BookShuffler.ViewModels
                 
                 if (_selectedEntity is SectionViewModel view)
                 {
+                    // If this is a section, we also set it as the active section so that the 2D editing pane
+                    // now shows the children of this section
                     this.ActiveSection = view;
                 }
                 else
                 {
+                    // Otherwise this is an index card
                     var parent = this.BruteForceFindParent(_selectedEntity.Id, _projectRoot);
                     if (parent is not null) this.ActiveSection = parent;
+                    this.ActiveSection?.BringChildToFront(_selectedEntity);
                 }
             }
         }

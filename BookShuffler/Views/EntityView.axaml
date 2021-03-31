@@ -1,0 +1,44 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="300"
+             x:Class="BookShuffler.Views.EntityView">
+
+    <Border BorderBrush="Black"
+            CornerRadius="5"
+            BorderThickness="2"
+            Padding="7"
+            MaxWidth="400"
+            MaxHeight="400"
+            Background="WhiteSmoke"
+            Tag="{Binding}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <TextBlock Grid.Row="0"
+                       TextWrapping="Wrap"
+                       FontWeight="Bold"
+                       Margin="3"
+                       Text="{Binding Summary}" />
+
+            <Separator Grid.Row="1"
+                       BorderBrush="DarkGray"
+                       BorderThickness="1" />
+
+            <ScrollViewer Grid.Row="2"
+                          MaxHeight="300"
+                          HorizontalScrollBarVisibility="Disabled"
+                          VerticalScrollBarVisibility="Auto">
+                <TextBlock Text="{Binding Content}"
+                           Margin="5"
+                           TextWrapping="Wrap" />
+            </ScrollViewer>
+        </Grid>
+    </Border>
+    
+</UserControl>

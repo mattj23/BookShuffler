@@ -8,6 +8,7 @@ namespace BookShuffler.ViewModels
     {
         Guid Id { get; }
         Point Position { get; set; }
+        int Z { get; set; }
         string Summary { get; set; }
         string? Notes { get; set; }
         WorkflowLabel Label { get; set; }
