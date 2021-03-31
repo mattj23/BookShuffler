@@ -91,6 +91,28 @@ namespace BookShuffler.ViewModels
             return project;
         }
 
+        public IndexCardViewModel AddNewCard(SectionViewModel parent, IndexCardViewModel child)
+        {
+            if (_allEntities.ContainsKey(child.Id)) 
+                throw new ArgumentException("Child already exists in the project");
+
+            parent.Entities.Add(child);
+            this.RegisterEntity(child);
+
+            return child;
+        }
+
+        public SectionViewModel AddNewSection(SectionViewModel parent, SectionViewModel child)
+        {
+            if (_allEntities.ContainsKey(child.Id)) 
+                throw new ArgumentException("Child already exists in the project");
+
+            parent.Entities.Add(child);
+            this.RegisterEntity(child);
+
+            return child;
+        }
+
         /// <summary>
         /// Merge a LoadResult into the project. The root node of the current project will be preserved, and
         /// any child nodes of the loaded root will be detached from it and reattached to the current project

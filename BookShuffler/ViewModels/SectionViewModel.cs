@@ -21,6 +21,12 @@ namespace BookShuffler.ViewModels
             this.Entities = new ObservableCollection<IEntityViewModel>();
         }
 
+        public SectionViewModel(string summary)
+        {
+            _model = new Entity {Id = Guid.NewGuid(), Summary = summary};
+            this.Entities = new ObservableCollection<IEntityViewModel>();
+        }
+
         public double ViewShiftX
         {
             get => _viewShiftX;
@@ -94,5 +100,6 @@ namespace BookShuffler.ViewModels
 
             child.Z = Entities.Max(e => e.Z) + 1;
         }
+
     }
 }
