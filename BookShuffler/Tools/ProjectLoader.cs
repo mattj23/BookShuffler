@@ -35,7 +35,7 @@ namespace BookShuffler.Parsing
 
             var deserializer = new YamlDotNet.Serialization.Deserializer();
 
-            var info = deserializer.Deserialize<ProjectInfo>(File.ReadAllText(projectFilePath));
+            result.Info = deserializer.Deserialize<ProjectInfo>(File.ReadAllText(projectFilePath));
 
             foreach (var file in Directory.EnumerateFiles(cardPath))
             {
@@ -51,7 +51,7 @@ namespace BookShuffler.Parsing
             }
             
             // Build the attached items
-            result.Root = (SectionViewModel) LoadEntity(info.RootId);
+            result.Root = (SectionViewModel) LoadEntity(result.Info.RootId);
             
             // Build the unattached sections
             var remaining = _sectionReps.Keys.Where(k => !_builtSections.ContainsKey(k)).ToArray();

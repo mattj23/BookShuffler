@@ -16,5 +16,7 @@ namespace BookShuffler.Models
         public List<IEntityViewModel> Unattached { get; set; }
         
         public List<IEntityViewModel> AllEntities { get; set; }
+
+        public ProjectInfo Info { get; set; }
     }
 }
