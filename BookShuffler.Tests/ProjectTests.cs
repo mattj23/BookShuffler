@@ -1,11 +1,12 @@
-﻿using BookShuffler.Tests.Mocks;
+﻿using BookShuffler.Tests.Fixtures;
+using BookShuffler.Tests.Mocks;
 using BookShuffler.Tools;
 using BookShuffler.ViewModels;
 using Xunit;
 
 namespace BookShuffler.Tests
 {
-    public class ProjectTests
+    public class ProjectTests : SimpleProject
     {
         /**
          * Things to test
