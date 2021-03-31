@@ -2,6 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="300"
              x:Class="BookShuffler.Views.EntityView">
 
@@ -12,6 +13,8 @@
             MaxWidth="400"
             MaxHeight="400"
             Background="WhiteSmoke"
+            PointerEnter="Border_OnPointerEnter"
+            PointerLeave="Border_OnPointerLeave"
             Tag="{Binding}">
         <Grid>
             <Grid.RowDefinitions>
@@ -20,11 +23,32 @@
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
-            <TextBlock Grid.Row="0"
-                       TextWrapping="Wrap"
-                       FontWeight="Bold"
-                       Margin="3"
-                       Text="{Binding Summary}" />
+            <DockPanel Grid.Row="0">
+                <Button DockPanel.Dock="Right"
+                        x:Name="SummaryEditButton"
+                        Click="SummaryEditButton_OnClick"
+                        IsVisible="False">
+                    <avalonia:MaterialIcon Kind="Edit" />
+                        
+                </Button>
+                
+                <TextBlock DockPanel.Dock="Left"
+                           x:Name="SummaryTextBlock"
+                           TextWrapping="Wrap"
+                           FontWeight="Bold"
+                           Margin="3"
+                           Text="{Binding Summary}" />
+                
+            </DockPanel>
+            
+            <TextBox Grid.Row="0"
+                     x:Name="SummaryTextBox"
+                     KeyDown="SummaryTextBox_OnKeyDown"
+                     TextWrapping="WrapWithOverflow"
+                     IsVisible="False"
+                     FontWeight="Bold"
+                     Text="{Binding Summary} "/>
+            
 
             <Separator Grid.Row="1"
                        BorderBrush="DarkGray"
