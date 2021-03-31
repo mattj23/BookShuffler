@@ -33,8 +33,8 @@ namespace BookShuffler.ViewModels
         private double _canvasScale;
         private double _treeScale;
         private bool _hasUnsavedChanges;
-        private List<IEntityViewModel> _allEntities = new List<IEntityViewModel>();
-        private List<IDisposable> _entitySubscriptions = new List<IDisposable>();
+        private readonly List<IEntityViewModel> _allEntities = new List<IEntityViewModel>();
+        private readonly List<IDisposable> _entitySubscriptions = new List<IDisposable>();
 
         public AppViewModel()
         {
@@ -55,8 +55,10 @@ namespace BookShuffler.ViewModels
             this.CreateSectionCommand =
                 ReactiveCommand.Create(this.AddSectionToSelected, _selectedIsSectionSubject);
 
-            this.SetCanvasScale = ReactiveCommand.Create<string>(d => this.CanvasScale = double.Parse(d));
-            this.SetTreeScale = ReactiveCommand.Create<string>(d => this.TreeScale = double.Parse(d));
+            this.SetCanvasScale = ReactiveCommand.Create<string>(d => this.SetCanvasScaleValue(double.Parse(d)));
+            this.SetTreeScale = ReactiveCommand.Create<string>(d => this.SetTreeScaleValue(double.Parse(d)));
+
+            this.AutoTileActiveSectionCommand = ReactiveCommand.Create(this.AutoTileActiveSection);
 
             this.CanvasScale = 1;
             this.TreeScale = 1;
@@ -85,6 +87,7 @@ namespace BookShuffler.ViewModels
         public ICommand CreateCardCommand { get; }
         public ICommand CreateSectionCommand { get; }
 
+        public ICommand AutoTileActiveSectionCommand { get; }
         public double CanvasScale
         {
             get => _canvasScale;
@@ -283,6 +286,11 @@ namespace BookShuffler.ViewModels
             this.ActiveSection?.ResortOrder();
         }
 
+        private void AutoTileActiveSection()
+        {
+            this.ActiveSection?.AutoTile(this.GetCanvasBounds?.Invoke().Width ?? 1200);
+        }
+
         private void LoadSettings()
         {
             var folder = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
@@ -294,6 +302,10 @@ namespace BookShuffler.ViewModels
             {
                 var des = new YamlDotNet.Serialization.Deserializer();
                 this.Settings = des.Deserialize<AppSettings>(File.ReadAllText(filePath));
+                
+                // Apply the loaded settings
+                if (this.Settings.CanvasScale is not null) this.CanvasScale = this.Settings.CanvasScale.Value;
+                if (this.Settings.ProjectTreeScale is not null) this.CanvasScale = this.Settings.ProjectTreeScale.Value;
             }
             else
             {
@@ -541,6 +553,20 @@ namespace BookShuffler.ViewModels
             if (this.SelectedDetachedEntity is null) return;
             this.RemoveFromDetached(this.SelectedDetachedEntity);
             this.SelectedDetachedEntity = null;
+        }
+
+        private void SetCanvasScaleValue(double d)
+        {
+            this.CanvasScale = d;
+            this.Settings.CanvasScale = d;
+            this.SaveSettings();
+        }
+        
+        private void SetTreeScaleValue(double d)
+        {
+            this.TreeScale = d;
+            this.Settings.ProjectTreeScale = d;
+            this.SaveSettings();
         }
     }
 }

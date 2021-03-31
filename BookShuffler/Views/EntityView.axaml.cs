@@ -1,8 +1,11 @@
+using System;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
+using BookShuffler.Models;
+using BookShuffler.ViewModels;
 
 namespace BookShuffler.Views
 {
@@ -11,6 +14,8 @@ namespace BookShuffler.Views
         private TextBox _textBox;
         private TextBlock _textBlock;
         private Button _summaryButton;
+        private TextBlock _textContent;
+        private ItemsControl _entityContent;
         
         public EntityView()
         {
@@ -23,6 +28,8 @@ namespace BookShuffler.Views
             _textBox = this.FindControl<TextBox>("SummaryTextBox");
             _textBlock = this.FindControl<TextBlock>("SummaryTextBlock");
             _summaryButton = this.FindControl<Button>("SummaryEditButton");
+            _textContent = this.FindControl<TextBlock>("TextContent");
+            _entityContent = this.FindControl<ItemsControl>("EntityContent");
         }
 
         private void Border_OnPointerEnter(object? sender, PointerEventArgs e)
@@ -47,6 +54,23 @@ namespace BookShuffler.Views
             {
                 _textBox.IsVisible = false;
                 _textBlock.IsVisible = true;
+            }
+        }
+
+        private void StyledElement_OnDataContextChanged(object? sender, EventArgs e)
+        {
+            if (this.DataContext is IndexCardViewModel)
+            {
+                this._entityContent.IsVisible = false;
+                this._textContent.IsVisible = true;
+                return;
+            }
+
+            if (this.DataContext is SectionViewModel)
+            {
+                this._entityContent.IsVisible = true;
+                this._textContent.IsVisible = false;
+                return;
             }
         }
     }

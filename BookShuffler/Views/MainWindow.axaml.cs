@@ -57,8 +57,6 @@ namespace BookShuffler.Views
                 var pointer = e.GetCurrentPoint(this);
                 var shift = pointer.Position - _dragStart;
                 _dragStart = pointer.Position;
-                // this.ViewModel.ActiveSection.ViewShiftX += shift.X;
-                // this.ViewModel.ActiveSection.ViewShiftY += shift.Y;
                 foreach (var entity in this.ViewModel.ActiveSection.Entities)
                 {
                     entity.Position += shift;
@@ -153,11 +151,6 @@ namespace BookShuffler.Views
             }
         }
 
-        private void AutoTile_OnClick(object? sender, RoutedEventArgs e)
-        {
-            this.ViewModel?.ActiveSection?.AutoTile(_layoutContainer.Bounds.Width);
-        }
-
         private async void OpenProject_OnClick(object? sender, RoutedEventArgs e)
         {
             this.ViewModel.GetCanvasBounds = () => _layoutContainer.Bounds;
@@ -206,6 +199,14 @@ namespace BookShuffler.Views
             {
                 _forceClose = true;
                 this.Close();
+            }
+        }
+
+        private void MainWindow_OnDataContextChanged(object? sender, EventArgs e)
+        {
+            if (this.ViewModel is not null)
+            {
+                this.ViewModel.GetCanvasBounds = () => _layoutContainer.Bounds;
             }
         }
     }

@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="300"
+             DataContextChanged="StyledElement_OnDataContextChanged"
              x:Class="BookShuffler.Views.EntityView">
 
     <Border BorderBrush="Black"
@@ -51,16 +52,36 @@
             
 
             <Separator Grid.Row="1"
-                       BorderBrush="DarkGray"
+                       BorderBrush="Black"
                        BorderThickness="1" />
 
             <ScrollViewer Grid.Row="2"
                           MaxHeight="300"
                           HorizontalScrollBarVisibility="Disabled"
                           VerticalScrollBarVisibility="Auto">
-                <TextBlock Text="{Binding Content}"
-                           Margin="5"
-                           TextWrapping="Wrap" />
+                
+                <Panel>
+                    <ItemsControl x:Name="EntityContent"
+                                  Items="{Binding Entities}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border BorderBrush="Black"
+                                        BorderThickness="1"
+                                        Margin="2"
+                                        Padding="1"
+                                        CornerRadius="3">
+                                    <TextBlock Text="{Binding Summary}"
+                                               TextWrapping="Wrap" />
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <TextBlock Text="{Binding Content}"
+                               Margin="5"
+                               x:Name="TextContent"
+                               TextWrapping="Wrap" />
+                </Panel>
+                
             </ScrollViewer>
         </Grid>
     </Border>
