@@ -4,14 +4,14 @@ using BookShuffler.Tools.Storage;
 
 namespace BookShuffler.Tests.Mocks
 {
-    public class MemoryFileSystem : IStorageProvider
+    public class MockFileSystem : IStorageProvider
     {
-        public MemoryFileSystem()
+        public MockFileSystem()
         {
             this.Values = new Dictionary<string, string>();
         }
 
-        public MemoryFileSystem(Dictionary<string, string> values)
+        public MockFileSystem(Dictionary<string, string> values)
         {
             this.Values = values;
         }

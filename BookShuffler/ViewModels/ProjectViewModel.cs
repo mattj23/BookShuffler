@@ -22,14 +22,14 @@ namespace BookShuffler.ViewModels
         private readonly List<IDisposable> _entitySubscriptions;
         private bool _hasUnsavedChanges;
 
-        private ProjectViewModel(string projectFolder, SectionViewModel root)
+        private ProjectViewModel(string projectFolder, SectionViewModel root, IEnumerable<Category> categories)
         {
             this.ProjectFolder = projectFolder;
             _root = root;
             
             this.DetachedEntities = new ObservableCollection<IEntityViewModel>();
             this.RootEntity = new ObservableCollection<IEntityViewModel>{_root};
-            this.Categories = new ObservableCollection<Category>();
+            this.Categories = new ProjectCategories(categories);
 
             _allEntities = new Dictionary<Guid, IEntityViewModel>{{_root.Id, root}};
             _entitySubscriptions = new List<IDisposable>();
@@ -50,7 +50,8 @@ namespace BookShuffler.ViewModels
 
         public ObservableCollection<IEntityViewModel> DetachedEntities { get; }
         public ObservableCollection<IEntityViewModel> RootEntity { get; }
-        public ObservableCollection<Category> Categories { get; }
+
+        public ProjectCategories Categories { get; }
 
         public IReadOnlyDictionary<Guid, IEntityViewModel> Entities => _allEntities;
 
@@ -62,7 +63,16 @@ namespace BookShuffler.ViewModels
         public static ProjectViewModel New(string projectFolder)
         {
             var root = new Entity {Summary = "Project Root", Id = Guid.NewGuid()};
-            return new ProjectViewModel(projectFolder, new SectionViewModel(root)) {HasUnsavedChanges = true};
+            var categories = new Category[]
+            {
+                new Category()
+                {
+                    ColorName = "White",
+                    Id = 0,
+                    Name = "Default"
+                }
+            };
+            return new ProjectViewModel(projectFolder, new SectionViewModel(root), categories) {HasUnsavedChanges = true};
         }
 
         /// <summary>
@@ -75,12 +85,9 @@ namespace BookShuffler.ViewModels
             if (loaded.ProjectFolder is null)
                 throw new ArgumentException("ProjectViewModel must be created by a LoadResult that has a path");
 
-            var project = new ProjectViewModel(loaded.ProjectFolder, loaded.Root);
+            var project = new ProjectViewModel(loaded.ProjectFolder, loaded.Root, loaded.Info.Categories);
             project.Merge(loaded);
-
-            foreach (var category in loaded.Info.Categories)
-                project.Categories.Add(category);
-
+            project.HasUnsavedChanges = false;
             return project;
         }
 
@@ -113,6 +120,12 @@ namespace BookShuffler.ViewModels
 
         private void RegisterEntity(IEntityViewModel viewModel)
         {
+            if (viewModel is IndexCardViewModel cardViewModel)
+            {
+                // If this is an index card we will attach the project's categories to it
+                cardViewModel.ProjectCategories = this.Categories;
+            }
+
             _allEntities[viewModel.Id] = viewModel;
             _entitySubscriptions.Add(viewModel.WhenAnyValue(e => e.Summary)
                 .Subscribe(_ => this.HasUnsavedChanges = true));

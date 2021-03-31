@@ -6,5 +6,7 @@ namespace BookShuffler.Models
     {  
         [YamlIgnore]
         public string? Content { get; set; }
+
+        public int CategoryId { get; set; }
     }
 }

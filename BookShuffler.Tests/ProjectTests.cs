@@ -10,9 +10,6 @@ namespace BookShuffler.Tests
         public void NewProject_ImportNew()
         {
             var project = ProjectViewModel.New("fake_folder");
-
-
-
         }
     }
 }

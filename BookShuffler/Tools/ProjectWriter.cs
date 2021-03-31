@@ -27,7 +27,7 @@ namespace BookShuffler.Tools
             var info = new ProjectInfo
             {
                 RootId = project.Root.Id,
-                Categories = project.Categories.ToList()
+                Categories = project.Categories.All.ToList()
             };
             var projectFile = _storage.Join(project.ProjectFolder, "project.yaml");
             

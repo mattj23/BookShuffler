@@ -18,7 +18,7 @@ namespace BookShuffler.Tools
             return deserializer.Deserialize<SerializableSection>(_storage.Get(file));
         }
 
-        public IndexCard? LoadIndexCard(string file)
+        public IndexCard LoadIndexCard(string file)
         {
             var deserializer = new YamlDotNet.Serialization.Deserializer();
             var text = _storage.Get(file);

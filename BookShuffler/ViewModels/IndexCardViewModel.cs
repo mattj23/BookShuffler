@@ -7,6 +7,7 @@ namespace BookShuffler.ViewModels
 {
     public class IndexCardViewModel : ViewModelBase, IEntityViewModel
     {
+        private IProjectCategories? _categories;
         private Point _position;
         private int _z;
 
@@ -14,7 +15,33 @@ namespace BookShuffler.ViewModels
 
         public IndexCardViewModel(IndexCard model)
         {
-            Model = model;
+            this.Model = model;
+        }
+
+        /// <summary>
+        /// Gets or sets (attaches) a set of categories defined by the project itself
+        /// </summary>
+        public IProjectCategories ProjectCategories
+        {
+            get => _categories;
+            set
+            {
+                if (_categories == value) return;
+                _categories = value;
+                this.RaisePropertyChanged();
+                this.RaisePropertyChanged(nameof(Category));
+            }
+        }
+
+        public Category? Category
+        {
+            get => _categories?.ById.ContainsKey(this.Model.CategoryId) == true ? _categories.ById[this.Model.CategoryId] : null;
+            set
+            {
+                if (this.Model.CategoryId == value?.Id) return;
+                this.Model.CategoryId = value?.Id ?? -1;
+                this.RaisePropertyChanged();
+            }
         }
 
         public int Z
