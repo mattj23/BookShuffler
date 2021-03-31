@@ -395,9 +395,12 @@ namespace BookShuffler.ViewModels
 
             var working = this.SelectedDetachedEntity;
             this.RemoveFromDetached(working);
-            
+
+            working.Position = new Point(0, 0);
             this.ActiveSection.Entities.Add(working);
+            this.ActiveSection.BringChildToFront(working);
             this.SelectedDetachedEntity = null;
+            
         }
 
         private void AddCardToSelected()
