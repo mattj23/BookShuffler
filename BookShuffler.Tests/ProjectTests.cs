@@ -41,5 +41,39 @@ namespace BookShuffler.Tests
 
             Assert.Contains($"fake/project.yaml", storage.Values.Keys);
         }
+
+        [Fact]
+        public void NewProject_Loads()
+        {
+            var storage = new MockFileSystem();
+            var writer = new ProjectWriter(storage);
+            writer.Save(Project);
+
+            var reader = new ProjectLoader(storage);
+            var result = reader.Load("fake");
+
+            var loaded = ProjectViewModel.FromLoad(result);
+
+            Assert.Equal(3, loaded.Root.Entities.Count);
+            Assert.Equal(C0.Id, loaded.Root.Entities[0].Id);
+            Assert.Equal(S0.Id, loaded.Root.Entities[1].Id);
+            Assert.Equal(S2.Id, loaded.Root.Entities[2].Id);
+
+            var s0 = loaded.Root.Entities[1] as SectionViewModel;
+            Assert.Equal(3, s0.Entities.Count);
+            Assert.Equal(C1.Id, s0.Entities[0].Id);
+            Assert.Equal(C2.Id, s0.Entities[1].Id);
+            Assert.Equal(S1.Id, s0.Entities[2].Id);
+
+            var s1 = s0.Entities[2] as SectionViewModel;
+            Assert.Single(s1.Entities);
+            Assert.Equal(C3.Id, s0.Entities[0].Id);
+
+            var s2 = loaded.Root.Entities[2] as SectionViewModel;
+            Assert.Single(s2.Entities);
+            Assert.Equal(C3.Id, s2.Entities[0].Id);
+
+
+        }
     }
 }
