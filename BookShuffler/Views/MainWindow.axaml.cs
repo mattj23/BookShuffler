@@ -7,7 +7,6 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
-using BookShuffler.Parsing;
 using BookShuffler.ViewModels;
 using MessageBox.Avalonia.Enums;
 
@@ -126,7 +125,7 @@ namespace BookShuffler.Views
 
             if (string.IsNullOrEmpty(result)) return;
 
-            this.ViewModel.NewProject(result);
+            // this.ViewModel.NewProject(result);
         }
 
         private async void ImportTaggedMarkdown_OnClick(object? sender, RoutedEventArgs e)
@@ -153,24 +152,24 @@ namespace BookShuffler.Views
 
         private async void OpenProject_OnClick(object? sender, RoutedEventArgs e)
         {
-            this.ViewModel.GetCanvasBounds = () => _layoutContainer.Bounds;
-            
-            var dialog = new OpenFileDialog
-            {
-                Directory = ViewModel.ProjectPath,
-                Title = "Select project.yaml File",
-                Filters = new List<FileDialogFilter>{new()
-                {
-                    Extensions = {"yml", "yaml"},
-                    Name = "Project YAML File"
-                }}
-            };
-
-            var result = await dialog.ShowAsync(this);
-
-            if (string.IsNullOrEmpty(result?.FirstOrDefault())) return;
-
-            this.ViewModel.OpenProject(result.First());
+            // this.ViewModel.GetCanvasBounds = () => _layoutContainer.Bounds;
+            //
+            // var dialog = new OpenFileDialog
+            // {
+            //     Directory = ViewModel.ProjectPath,
+            //     Title = "Select project.yaml File",
+            //     Filters = new List<FileDialogFilter>{new()
+            //     {
+            //         Extensions = {"yml", "yaml"},
+            //         Name = "Project YAML File"
+            //     }}
+            // };
+            //
+            // var result = await dialog.ShowAsync(this);
+            //
+            // if (string.IsNullOrEmpty(result?.FirstOrDefault())) return;
+            //
+            // this.ViewModel.OpenProject(result.First());
         }
 
         private void Section_OnDoubleTapped(object? sender, RoutedEventArgs e)

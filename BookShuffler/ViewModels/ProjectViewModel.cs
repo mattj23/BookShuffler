@@ -2,9 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using BookShuffler.Models;
-using BookShuffler.Parsing;
+using BookShuffler.Tools;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Operations;
 using ReactiveUI;
 
 namespace BookShuffler.ViewModels
@@ -16,7 +18,7 @@ namespace BookShuffler.ViewModels
     public class ProjectViewModel : ViewModelBase, IDisposable
     {
         private readonly SectionViewModel _root;
-        private readonly List<IEntityViewModel> _allEntities;
+        private readonly Dictionary<Guid, IEntityViewModel> _allEntities;
         private readonly List<IDisposable> _entitySubscriptions;
         private bool _hasUnsavedChanges;
 
@@ -29,11 +31,13 @@ namespace BookShuffler.ViewModels
             this.RootEntity = new ObservableCollection<IEntityViewModel>{_root};
             this.Categories = new ObservableCollection<Category>();
 
-            _allEntities = new List<IEntityViewModel>();
+            _allEntities = new Dictionary<Guid, IEntityViewModel>{{_root.Id, root}};
             _entitySubscriptions = new List<IDisposable>();
         }
 
         public string ProjectFolder { get; }
+
+        public SectionViewModel Root => _root;
 
         /// <summary>
         /// Gets whether or not the project has unsaved changes
@@ -48,6 +52,8 @@ namespace BookShuffler.ViewModels
         public ObservableCollection<IEntityViewModel> RootEntity { get; }
         public ObservableCollection<Category> Categories { get; }
 
+        public IReadOnlyDictionary<Guid, IEntityViewModel> Entities => _allEntities;
+
         /// <summary>
         /// Create a new project in a specified folder
         /// </summary>
@@ -60,39 +66,54 @@ namespace BookShuffler.ViewModels
         }
 
         /// <summary>
-        /// Open a project view model from a specified project file
+        /// Create a project from a LoadResult
         /// </summary>
-        /// <param name="projectFile"></param>
+        /// <param name="loaded"></param>
         /// <returns></returns>
-        public static ProjectViewModel Open(string projectFile)
+        public static ProjectViewModel FromLoad(LoadResult loaded)
         {
-            var loader = new ProjectLoader();
-            var result = loader.Load(projectFile);
-            var folder = new FileInfo(projectFile).DirectoryName;
+            if (loaded.ProjectFolder is null)
+                throw new ArgumentException("ProjectViewModel must be created by a LoadResult that has a path");
 
-            var project = new ProjectViewModel(folder, result.Root);
+            var project = new ProjectViewModel(loaded.ProjectFolder, loaded.Root);
+            project.Merge(loaded);
 
-            foreach (var entity in result.AllEntities)
-            {
-                project.RegisterEntity(entity);
-            }
-
-            foreach (var entity in result.Unattached)
-            {
-                project.DetachedEntities.Add(entity);
-            }
-
-            foreach (var category in result.Info.Categories)
-            {
+            foreach (var category in loaded.Info.Categories)
                 project.Categories.Add(category);
-            }
 
             return project;
         }
 
+        /// <summary>
+        /// Merge a LoadResult into the project. The root node of the current project will be preserved, and
+        /// any child nodes of the loaded root will be detached from it and reattached to the current project
+        /// root. 
+        /// </summary>
+        /// <param name="loaded"></param>
+        public void Merge(LoadResult loaded)
+        {
+            if (loaded.Root != this._root)
+            {
+                foreach (var entity in loaded.AllEntities.Values)
+                {
+                    this.RegisterEntity(entity);
+                }
+            }
+
+            foreach (var child in loaded.Root.Entities)
+            {
+                this._root.Entities.Add(child);
+            }
+
+            foreach (var entity in loaded.Unattached)
+            {
+                this.DetachedEntities.Add(entity);
+            }
+        }
+
         private void RegisterEntity(IEntityViewModel viewModel)
         {
-            _allEntities.Add(viewModel);
+            _allEntities[viewModel.Id] = viewModel;
             _entitySubscriptions.Add(viewModel.WhenAnyValue(e => e.Summary)
                 .Subscribe(_ => this.HasUnsavedChanges = true));
             _entitySubscriptions.Add(viewModel.WhenAnyValue(e => e.Position)

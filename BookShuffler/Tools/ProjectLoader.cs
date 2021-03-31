@@ -4,9 +4,10 @@ using System.IO;
 using System.Linq;
 using Avalonia;
 using BookShuffler.Models;
+using BookShuffler.Tools.Storage;
 using BookShuffler.ViewModels;
 
-namespace BookShuffler.Parsing
+namespace BookShuffler.Tools
 {
     public class ProjectLoader
     {
@@ -17,36 +18,39 @@ namespace BookShuffler.Parsing
         private readonly Dictionary<Guid, SerializableSection> _sectionReps;
         private readonly Dictionary<Guid, SectionViewModel> _builtSections;
         private readonly Dictionary<Guid, IndexCardViewModel> _builtCards;
+        private readonly IStorageProvider _storage;
 
-        public ProjectLoader()
+        public ProjectLoader(IStorageProvider storage)
         {
+            _storage = storage;
             _cards = new Dictionary<Guid, IndexCard>();
             _sectionReps = new Dictionary<Guid, SerializableSection>();
             _builtCards = new Dictionary<Guid, IndexCardViewModel>();
             _builtSections = new Dictionary<Guid, SectionViewModel>();
         }
         
-        public LoadResult Load(string projectFilePath)
+        public LoadResult Load(string projectPath)
         {
             var result = new LoadResult();
-            var fileInfo = new FileInfo(projectFilePath);
-            var sectionPath = Path.Combine(fileInfo.DirectoryName, SectionFolderName);
-            var cardPath = Path.Combine(fileInfo.DirectoryName, CardFolderName);
+            var projectFilePath = _storage.Join(projectPath, "project.yaml");
+            var sectionPath = _storage.Join(projectPath, SectionFolderName);
+            var cardPath = _storage.Join(projectPath, CardFolderName);
 
             var deserializer = new YamlDotNet.Serialization.Deserializer();
+            result.Info = deserializer.Deserialize<ProjectInfo>(_storage.Get(projectFilePath));
 
-            result.Info = deserializer.Deserialize<ProjectInfo>(File.ReadAllText(projectFilePath));
+            var reader = new EntityReader(_storage);
 
-            foreach (var file in Directory.EnumerateFiles(cardPath))
+            foreach (var file in _storage.List(cardPath))
             {
-                var cardInfo = Serializer.LoadIndexCard(file);
+                var cardInfo = reader.LoadIndexCard(file);
                 if (cardInfo is not null)
                     _cards[cardInfo.Id] = cardInfo;
             }
             
-            foreach (var file in Directory.EnumerateFiles(sectionPath))
+            foreach (var file in _storage.List(sectionPath))
             {
-                var item = Serializer.LoadSection(file);
+                var item = reader.LoadSection(file);
                 _sectionReps[item.Id] = item;
             }
             
@@ -94,9 +98,15 @@ namespace BookShuffler.Parsing
                         suspect.Position = new Point(child.X, child.Y);
                 }
             }
-            
-            result.AllEntities.AddRange(_builtCards.Values);
-            result.AllEntities.AddRange(_builtSections.Values);
+
+            foreach (var entity in _builtSections.Values)
+            {
+                result.AllEntities[entity.Id] = entity;
+            }
+            foreach (var entity in _builtCards.Values)
+            {
+                result.AllEntities[entity.Id] = entity;
+            }
             return result;
         }
 

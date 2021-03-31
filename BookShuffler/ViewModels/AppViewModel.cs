@@ -12,7 +12,8 @@ using System.Windows.Input;
 using Avalonia;
 using Avalonia.Controls.Shapes;
 using BookShuffler.Models;
-using BookShuffler.Parsing;
+using BookShuffler.Tools;
+using BookShuffler.Tools.MarkdownImport;
 using ReactiveUI;
 using YamlDotNet.RepresentationModel;
 using Path = System.IO.Path;
@@ -35,6 +36,7 @@ namespace BookShuffler.ViewModels
         private bool _hasUnsavedChanges;
         private readonly List<IEntityViewModel> _allEntities = new List<IEntityViewModel>();
         private readonly List<IDisposable> _entitySubscriptions = new List<IDisposable>();
+        private ProjectViewModel? _project;
 
         public AppViewModel()
         {
@@ -43,7 +45,7 @@ namespace BookShuffler.ViewModels
             this.RootItem = new ObservableCollection<IEntityViewModel>();
             this.Unattached = new ObservableCollection<IEntityViewModel>();
 
-            this.SaveProjectCommand = ReactiveCommand.Create(this.SaveProject);
+            // this.SaveProjectCommand = ReactiveCommand.Create(this.SaveProject);
             this.DetachSelectedCommand = ReactiveCommand.Create(this.DetachSelected);
             this.AttachSelectedCommand = ReactiveCommand.Create(this.AttachSelected);
             this.LaunchEditorCommand = ReactiveCommand.Create(this.LaunchEditorOnSelected);
@@ -65,13 +67,19 @@ namespace BookShuffler.ViewModels
 
             this.LoadSettings();
 
-            if (File.Exists(this.Settings.LastOpenedProject))
-            {
-                this.OpenProject(this.Settings.LastOpenedProject);
-            }
+            // if (File.Exists(this.Settings.LastOpenedProject))
+            // {
+            //     this.OpenProject(this.Settings.LastOpenedProject);
+            // }
         }
 
         public AppSettings Settings { get; private set; }
+
+        public ProjectViewModel? Project
+        {
+            get => _project;
+            set => this.RaiseAndSetIfChanged(ref _project, value);
+        }
 
         public ICommand SetCanvasScale { get; }
         public ICommand SetTreeScale { get; }
@@ -200,85 +208,16 @@ namespace BookShuffler.ViewModels
         }
 
         /// <summary>
-        /// Create a new project at the given project path
-        /// </summary>
-        /// <param name="path"></param>
-        public void NewProject(string path)
-        {
-            this.ProjectPath = path;
-            var model = new Entity
-            {
-                Id = Guid.NewGuid(),
-                Summary = "Project Root"
-            };
-            _projectRoot = new SectionViewModel(model);
-            this.RootItem.Add(_projectRoot);
-            this.SelectedEntity = _projectRoot;
-
-            this.Settings.LastOpenedProject = path;
-            this.SaveSettings();
-        }
-
-        public void OpenProject(string path)
-        {
-            this.RootItem.Clear();
-            this.Unattached.Clear();
-
-            var loader = new ProjectLoader();
-            var result = loader.Load(path);
-
-            this.ClearAllEntities();
-            foreach (var entity in result.AllEntities)
-            {
-                this.RegisterEntity(entity);
-            }
-
-            _projectRoot = result.Root;
-            this.RootItem.Add(_projectRoot);
-            this.SelectedEntity = _projectRoot;
-            foreach (var unattached in result.Unattached)
-            {
-                this.Unattached.Add(unattached);
-            }
-
-            this.ProjectPath = new FileInfo(path).DirectoryName;
-            this.Settings.LastOpenedProject = path;
-            this.SaveSettings();
-
-            this.HasUnsavedChanges = false;
-        }
-
-        private void ClearAllEntities()
-        {
-            foreach (var d in _entitySubscriptions)
-            {
-                d.Dispose();
-            }
-
-            _entitySubscriptions.Clear();
-            _allEntities.Clear();
-        }
-
-        private void RegisterEntity(IEntityViewModel viewModel)
-        {
-            _allEntities.Add(viewModel);
-            _entitySubscriptions.Add(viewModel.WhenAnyValue(e => e.Summary)
-                .Subscribe(_ => this.HasUnsavedChanges = true));
-            _entitySubscriptions.Add(viewModel.WhenAnyValue(e => e.Position)
-                .Subscribe(_ => this.HasUnsavedChanges = true));
-        }
-
-        /// <summary>
         /// Import a tagged markdown file into the currently active project
         /// </summary>
         /// <param name="files"></param>
         public void ImportTaggedMarkdown(string[] files)
         {
-            foreach (var file in files)
-            {
-                var parseResult = MarkdownParser.Parse(file);
-                this.MergeLoadResult(parseResult);
-            }
+            // foreach (var file in files)
+            // {
+            //     var parseResult = MarkdownParser.Parse(file);
+            //     this.MergeLoadResult(parseResult);
+            // }
         }
 
         public void ResortActiveSection()
@@ -321,74 +260,6 @@ namespace BookShuffler.ViewModels
             File.WriteAllText(filePath, ser.Serialize(this.Settings));
         }
 
-        private void MergeLoadResult(ParseResult loaded)
-        {
-            // Load chapters and their entire descendant chain 
-            foreach (var chapterId in loaded.Chapters)
-            {
-                var section = loaded.Sections.FirstOrDefault(s => s.Id == chapterId);
-
-                // Now load this section and all of its children
-                if (section != null)
-                {
-                    var newSection = LoadRecursive(section, loaded);
-                    newSection.AutoTile(this.GetCanvasBounds?.Invoke().Width ?? 1200);
-                    _projectRoot.Entities.Add(newSection);
-                }
-            }
-
-            this.HasUnsavedChanges = true;
-        }
-
-        private SectionViewModel LoadRecursive(SectionEntity raw, ParseResult loaded)
-        {
-            var viewModel = new SectionViewModel(raw);
-            this.RegisterEntity(viewModel);
-            foreach (var id in raw.Children)
-            {
-                var sectionChild = loaded.Sections.FirstOrDefault(s => s.Id == id);
-                if (sectionChild != null)
-                {
-                    var newSection = LoadRecursive(sectionChild, loaded);
-                    newSection.AutoTile(this.GetCanvasBounds?.Invoke().Width ?? 1200);
-                    viewModel.Entities.Add(newSection);
-                    continue;
-                }
-
-                var cardChild = loaded.Cards.FirstOrDefault(c => c.Id == id);
-                if (cardChild != null)
-                {
-                    var cardViewModel = new IndexCardViewModel(cardChild);
-                    viewModel.Entities.Add(cardViewModel);
-                    this.RegisterEntity(cardViewModel);
-                }
-            }
-
-            return viewModel;
-        }
-
-        private void SaveProject()
-        {
-            var projectPath = this.ProjectPath;
-            if (projectPath == null) return;
-
-            Serializer.ClearData(projectPath);
-
-            _projectRoot.Serialize(projectPath);
-            foreach (var entity in this.Unattached)
-            {
-                entity.Serialize(projectPath);
-            }
-
-            var outputFile = System.IO.Path.Combine(projectPath, "project.yaml");
-            var serializer = new YamlDotNet.Serialization.Serializer();
-            File.WriteAllText(outputFile, serializer.Serialize(new ProjectInfo
-            {
-                RootId = _projectRoot.Id,
-            }));
-
-            this.HasUnsavedChanges = false;
-        }
 
         private void DetachSelected()
         {
@@ -530,22 +401,22 @@ namespace BookShuffler.ViewModels
 
         private void LoadSelectedFromFile()
         {
-            if (_selectedEntity is IndexCardViewModel card)
-            {
-                var loaded = Serializer.LoadIndexCard(this.SelectedEntityFile());
-                card.Label = loaded.Label;
-                card.Summary = loaded.Summary;
-                card.Notes = loaded.Notes;
-                card.Content = loaded.Content;
-            }
-
-            if (_selectedEntity is SectionViewModel section)
-            {
-                var loaded = Serializer.LoadSection(this.SelectedEntityFile());
-                section.Label = loaded.Label;
-                section.Summary = loaded.Summary;
-                section.Notes = loaded.Notes;
-            }
+            // if (_selectedEntity is IndexCardViewModel card)
+            // {
+            //     var loaded = EntityWriter.LoadIndexCard(this.SelectedEntityFile());
+            //     card.Label = loaded.Label;
+            //     card.Summary = loaded.Summary;
+            //     card.Notes = loaded.Notes;
+            //     card.Content = loaded.Content;
+            // }
+            //
+            // if (_selectedEntity is SectionViewModel section)
+            // {
+            //     var loaded = EntityWriter.LoadSection(this.SelectedEntityFile());
+            //     section.Label = loaded.Label;
+            //     section.Summary = loaded.Summary;
+            //     section.Notes = loaded.Notes;
+            // }
         }
 
         private void DeleteSelected()

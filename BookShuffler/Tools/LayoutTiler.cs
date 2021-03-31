@@ -2,10 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Avalonia;
-using Avalonia.Controls.Shapes;
 using BookShuffler.ViewModels;
 
-namespace BookShuffler.Parsing
+namespace BookShuffler.Tools
 {
     /// <summary>
     /// Tool to perform the tiling layout of a section's contents

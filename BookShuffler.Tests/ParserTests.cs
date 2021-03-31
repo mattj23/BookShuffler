@@ -1,7 +1,6 @@
 using System;
 using System.IO;
-using BookShuffler.Models;
-using BookShuffler.Parsing;
+using BookShuffler.Tools.MarkdownImport;
 using Xunit;
 
 namespace BookShuffler.Tests

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using BookShuffler.Models;
 
-namespace BookShuffler.Parsing
+namespace BookShuffler.Tools.MarkdownImport
 {
     public static class MarkdownParser
     {
