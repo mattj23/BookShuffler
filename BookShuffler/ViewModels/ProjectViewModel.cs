@@ -22,7 +22,7 @@ namespace BookShuffler.ViewModels
         private readonly List<IDisposable> _entitySubscriptions;
         private bool _hasUnsavedChanges;
 
-        private ProjectViewModel(string projectFolder, SectionViewModel root, IEnumerable<Category> categories)
+        private ProjectViewModel(string projectFolder, SectionViewModel root, IEnumerable<CategoryViewModel> categories)
         {
             this.ProjectFolder = projectFolder;
             _root = root;
@@ -63,14 +63,14 @@ namespace BookShuffler.ViewModels
         public static ProjectViewModel New(string projectFolder)
         {
             var root = new Entity {Summary = "Project Root", Id = Guid.NewGuid()};
-            var categories = new Category[]
+            var categories = new[]
             {
-                new Category()
+                new CategoryViewModel(new Category()
                 {
                     ColorName = "White",
                     Id = 0,
                     Name = "Default"
-                }
+                })
             };
             return new ProjectViewModel(projectFolder, new SectionViewModel(root), categories) {HasUnsavedChanges = true};
         }
@@ -84,8 +84,8 @@ namespace BookShuffler.ViewModels
         {
             if (loaded.ProjectFolder is null)
                 throw new ArgumentException("ProjectViewModel must be created by a LoadResult that has a path");
-
-            var project = new ProjectViewModel(loaded.ProjectFolder, loaded.Root, loaded.Info.Categories);
+            var categories = loaded.Info.Categories.Select(c => new CategoryViewModel(c));
+            var project = new ProjectViewModel(loaded.ProjectFolder, loaded.Root, categories);
             project.Merge(loaded);
             project.HasUnsavedChanges = false;
             return project;
@@ -121,23 +121,12 @@ namespace BookShuffler.ViewModels
         /// <param name="loaded"></param>
         public void Merge(LoadResult loaded)
         {
-            if (loaded.Root != this._root)
-            {
-                foreach (var entity in loaded.AllEntities.Values)
-                {
-                    this.RegisterEntity(entity);
-                }
-            }
+            if (loaded.Root != _root)
+                foreach (var child in loaded.Root.Entities)
+                    _root.Entities.Add(child);
 
-            foreach (var child in loaded.Root.Entities)
-            {
-                this._root.Entities.Add(child);
-            }
-
-            foreach (var entity in loaded.Unattached)
-            {
-                this.DetachedEntities.Add(entity);
-            }
+            foreach (var entity in loaded.AllEntities.Values) RegisterEntity(entity);
+            foreach (var entity in loaded.Unattached) DetachedEntities.Add(entity);
         }
 
         private void RegisterEntity(IEntityViewModel viewModel)

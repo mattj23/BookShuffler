@@ -31,7 +31,7 @@ namespace BookShuffler.Tools
         
         public LoadResult Load(string projectPath)
         {
-            var result = new LoadResult();
+            var result = new LoadResult {ProjectFolder = projectPath};
             var projectFilePath = _storage.Join(projectPath, "project.yaml");
             var sectionPath = _storage.Join(projectPath, SectionFolderName);
             var cardPath = _storage.Join(projectPath, CardFolderName);

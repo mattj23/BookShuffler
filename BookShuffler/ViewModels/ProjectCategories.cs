@@ -5,8 +5,8 @@ namespace BookShuffler.ViewModels
 {
     public interface IProjectCategories
     {
-        ReadOnlyObservableCollection<Category> All { get; }
-        IReadOnlyDictionary<int, Category> ById { get; }
+        ReadOnlyObservableCollection<CategoryViewModel> All { get; }
+        IReadOnlyDictionary<int, CategoryViewModel> ById { get; }
     }
 
     /// <summary>
@@ -14,14 +14,14 @@ namespace BookShuffler.ViewModels
     /// </summary>
     public class ProjectCategories : IProjectCategories
     {
-        private readonly ObservableCollection<Category> _categories;
-        private readonly Dictionary<int, Category> _byId;
+        private readonly ObservableCollection<CategoryViewModel> _categories;
+        private readonly Dictionary<int, CategoryViewModel> _byId;
 
-        public ProjectCategories(IEnumerable<Category> categories)
+        public ProjectCategories(IEnumerable<CategoryViewModel> categories)
         {
-            _categories = new ObservableCollection<Category>();
-            _byId = new Dictionary<int, Category>();
-            this.All = new ReadOnlyObservableCollection<Category>(_categories);
+            _categories = new ObservableCollection<CategoryViewModel>();
+            _byId = new Dictionary<int, CategoryViewModel>();
+            this.All = new ReadOnlyObservableCollection<CategoryViewModel>(_categories);
 
             foreach (var cat in categories)
             {
@@ -30,7 +30,7 @@ namespace BookShuffler.ViewModels
             }
         }
 
-        public ReadOnlyObservableCollection<Category> All { get; }
-        public IReadOnlyDictionary<int, Category> ById => _byId;
+        public ReadOnlyObservableCollection<CategoryViewModel> All { get; }
+        public IReadOnlyDictionary<int, CategoryViewModel> ById => _byId;
     }
 }

@@ -70,12 +70,15 @@ namespace BookShuffler.Tests
 
             var id = Guid.NewGuid();
 
-            var categories = new ProjectCategories(new []{new Category
+            var categories = new ProjectCategories(new[]
             {
-                ColorName = "Black",
-                Id=30,
-                Name = "Test Category"
-            }});
+                new CategoryViewModel(new Category
+                {
+                    ColorName = "Black",
+                    Id = 30,
+                    Name = "Test Category"
+                })
+            });
 
             var card = new IndexCardViewModel(new IndexCard()
             {

@@ -33,7 +33,7 @@ namespace BookShuffler.ViewModels
             }
         }
 
-        public Category? Category
+        public CategoryViewModel? Category
         {
             get => _categories?.ById.ContainsKey(this.Model.CategoryId) == true ? _categories.ById[this.Model.CategoryId] : null;
             set

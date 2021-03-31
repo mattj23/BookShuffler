@@ -67,12 +67,14 @@ namespace BookShuffler.Tests
 
             var s1 = s0.Entities[2] as SectionViewModel;
             Assert.Single(s1.Entities);
-            Assert.Equal(C3.Id, s0.Entities[0].Id);
+            Assert.Equal(C3.Id, s1.Entities[0].Id);
 
             var s2 = loaded.Root.Entities[2] as SectionViewModel;
             Assert.Single(s2.Entities);
-            Assert.Equal(C3.Id, s2.Entities[0].Id);
+            Assert.Equal(C4.Id, s2.Entities[0].Id);
 
+            var c3 = s0.Entities[0] as IndexCardViewModel;
+            Assert.Equal("Default", c3.Category.Name);
 
         }
     }
