@@ -37,7 +37,7 @@ namespace BookShuffler.Tools.Storage
                 return;
             }
 
-            if (Directory.Exists(path)) Directory.Delete(path);
+            if (Directory.Exists(path)) Directory.Delete(path, true);
         }
 
         public string PrefixOf(string path)

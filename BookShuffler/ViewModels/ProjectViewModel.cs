@@ -145,16 +145,17 @@ namespace BookShuffler.ViewModels
             return entity;
         }
 
-        public void AttachEntity(IEntityViewModel? entity, SectionViewModel? newParent)
+        public IEntityViewModel? AttachEntity(IEntityViewModel? entity, SectionViewModel? newParent)
         {
-            if (entity is null) return;
-            if (newParent is null) return;
+            if (entity is null) return null;
+            if (newParent is null) return null;
             
             // Find the entity in the detached
             var located = this.RemoveFromDetached(entity);
-            if (located is null) return;
+            if (located is null) return null;
             
             newParent.Entities.Add(entity);
+            return entity;
         }
 
         /// <summary>

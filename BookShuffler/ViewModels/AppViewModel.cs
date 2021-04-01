@@ -23,8 +23,6 @@ namespace BookShuffler.ViewModels
 {
     public class AppViewModel : ViewModelBase
     {
-        private string? _projectPath;
-        private SectionViewModel _projectRoot;
         private SectionViewModel _activeSection;
         private IEntityViewModel? _selectedEntity;
         private IEntityViewModel? _selectedDetachedEntity;
@@ -32,8 +30,6 @@ namespace BookShuffler.ViewModels
         private readonly BehaviorSubject<bool> _selectedIsSectionSubject;
         private double _canvasScale;
         private double _treeScale;
-        private readonly List<IEntityViewModel> _allEntities = new List<IEntityViewModel>();
-        private readonly List<IDisposable> _entitySubscriptions = new List<IDisposable>();
         private ProjectViewModel? _project;
         private IDisposable? _unsavedSubscription;
 
@@ -49,18 +45,27 @@ namespace BookShuffler.ViewModels
 
             _selectedIsSectionSubject = new BehaviorSubject<bool>(false);
 
-            // this.SaveProjectCommand = ReactiveCommand.Create(this.SaveProject);
+            this.SaveProjectCommand = ReactiveCommand.Create(this.SaveProject);
+            
             this.DetachSelectedCommand = ReactiveCommand.Create(() =>
             {
                 var detached = this.Project?.DetachEntity(this.SelectedEntity);
                 if (detached is not null) this.SelectedDetachedEntity = detached;
+                this.SelectedEntity = null;
             });
             
             this.AttachSelectedCommand = ReactiveCommand.Create(() =>
-                this.Project?.AttachEntity(this.SelectedDetachedEntity, this.ActiveSection));
+            {
+                var attached =this.Project?.AttachEntity(this.SelectedDetachedEntity, this.ActiveSection);
+                if (attached is not null)
+                {
+                    this.SelectedEntity = attached;
+                    this.SelectedDetachedEntity = null;
+                }
+            });
 
-            this.LaunchEditorCommand = ReactiveCommand.Create(this.LaunchEditorOnSelected);
-            this.LoadFromFileCommand = ReactiveCommand.Create(this.LoadSelectedFromFile);
+            // this.LaunchEditorCommand = ReactiveCommand.Create(this.LaunchEditorOnSelected);
+            // this.LoadFromFileCommand = ReactiveCommand.Create(this.LoadSelectedFromFile);
             this.DeleteEntityCommand = ReactiveCommand.Create(this.DeleteSelected);
 
             this.CreateCardCommand =
@@ -206,6 +211,14 @@ namespace BookShuffler.ViewModels
             set => this.RaiseAndSetIfChanged(ref _selectedDetachedEntity, value);
         }
 
+        public void SaveProject()
+        {
+            if (this.Project is null) return;
+            var writer = new ProjectWriter(_storage);
+            writer.Save(this.Project);
+            this.Project.HasUnsavedChanges = false;
+        }
+
         /// <summary>
         /// Opens a project from the storage provider
         /// </summary>
@@ -233,11 +246,13 @@ namespace BookShuffler.ViewModels
         /// <param name="files"></param>
         public void ImportTaggedMarkdown(string[] files)
         {
-            // foreach (var file in files)
-            // {
-            //     var parseResult = MarkdownParser.Parse(file);
-            //     this.MergeLoadResult(parseResult);
-            // }
+            if (this.Project is null) return;
+            
+            foreach (var file in files)
+            {
+                var parseResult = MarkdownParser.Parse(file);
+                this.Project.Merge(parseResult.ToLoadResult());
+            }
         }
 
         public void ResortActiveSection()
@@ -302,42 +317,42 @@ namespace BookShuffler.ViewModels
             this.ActiveSection?.Entities.Add(new SectionViewModel(entity));
         }
 
-        private string SelectedEntityFile()
-        {
-            if (_selectedEntity is SectionViewModel)
-            {
-                return Path.Combine(_projectPath, ProjectLoader.SectionFolderName, $"{_selectedEntity.Id}.yaml");
-            }
-
-            if (_selectedEntity is IndexCardViewModel)
-            {
-                return Path.Combine(_projectPath, ProjectLoader.CardFolderName, $"{_selectedEntity.Id}.md");
-            }
-
-            throw new ArgumentException($"No file known for type {_selectedEntity.GetType()}");
-        }
-
-        private void LaunchEditorOnSelected()
-        {
-            if (_selectedEntity is not null)
-            {
-                var file = this.SelectedEntityFile();
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-                {
-                    var process = new Process {StartInfo = {FileName = "xdg-open", Arguments = file}};
-                    process.Start();
-                }
-                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-                {
-                    var process = new Process {StartInfo = {FileName = "open", Arguments = file}};
-                    process.Start();
-                }
-                else
-                {
-                    Process.Start(file);
-                }
-            }
-        }
+        // private string SelectedEntityFile()
+        // {
+        //     if (_selectedEntity is SectionViewModel)
+        //     {
+        //         return Path.Combine(_projectPath, ProjectLoader.SectionFolderName, $"{_selectedEntity.Id}.yaml");
+        //     }
+        //
+        //     if (_selectedEntity is IndexCardViewModel)
+        //     {
+        //         return Path.Combine(_projectPath, ProjectLoader.CardFolderName, $"{_selectedEntity.Id}.md");
+        //     }
+        //
+        //     throw new ArgumentException($"No file known for type {_selectedEntity.GetType()}");
+        // }
+        //
+        // private void LaunchEditorOnSelected()
+        // {
+        //     if (_selectedEntity is not null)
+        //     {
+        //         var file = this.SelectedEntityFile();
+        //         if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        //         {
+        //             var process = new Process {StartInfo = {FileName = "xdg-open", Arguments = file}};
+        //             process.Start();
+        //         }
+        //         else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        //         {
+        //             var process = new Process {StartInfo = {FileName = "open", Arguments = file}};
+        //             process.Start();
+        //         }
+        //         else
+        //         {
+        //             Process.Start(file);
+        //         }
+        //     }
+        // }
 
         private void LoadSelectedFromFile()
         {

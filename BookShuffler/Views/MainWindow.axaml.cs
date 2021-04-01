@@ -131,7 +131,6 @@ namespace BookShuffler.Views
 
         private async void ImportTaggedMarkdown_OnClick(object? sender, RoutedEventArgs e)
         {
-            
             var dialog = new OpenFileDialog
             {
                 AllowMultiple = true,
@@ -153,24 +152,22 @@ namespace BookShuffler.Views
 
         private async void OpenProject_OnClick(object? sender, RoutedEventArgs e)
         {
-            // this.ViewModel.GetCanvasBounds = () => _layoutContainer.Bounds;
-            //
-            // var dialog = new OpenFileDialog
-            // {
-            //     Directory = ViewModel.ProjectPath,
-            //     Title = "Select project.yaml File",
-            //     Filters = new List<FileDialogFilter>{new()
-            //     {
-            //         Extensions = {"yml", "yaml"},
-            //         Name = "Project YAML File"
-            //     }}
-            // };
-            //
-            // var result = await dialog.ShowAsync(this);
-            //
-            // if (string.IsNullOrEmpty(result?.FirstOrDefault())) return;
-            //
-            // this.ViewModel.OpenProject(result.First());
+            var dialog = new OpenFileDialog
+            {
+                Directory = ViewModel?.Project?.ProjectFolder,
+                Title = "Select project.yaml File",
+                Filters = new List<FileDialogFilter>{new()
+                {
+                    Extensions = {"yml", "yaml"},
+                    Name = "Project YAML File"
+                }}
+            };
+            
+            var result = await dialog.ShowAsync(this);
+            
+            if (string.IsNullOrEmpty(result?.FirstOrDefault())) return;
+            
+            this.ViewModel?.OpenProject(result.First());
         }
 
         private void Section_OnDoubleTapped(object? sender, RoutedEventArgs e)
