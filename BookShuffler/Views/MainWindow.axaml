@@ -23,8 +23,8 @@
     
     <Window.Styles>
         <Style Selector="ItemsControl > ContentPresenter">
-            <Setter Property="Canvas.Left" Value="{Binding Position.X}"/>
-            <Setter Property="Canvas.Top" Value="{Binding Position.Y}"/>
+            <Setter Property="Canvas.Left" Value="{Binding ViewPosition.X}"/>
+            <Setter Property="Canvas.Top" Value="{Binding ViewPosition.Y}"/>
             <Setter Property="Canvas.ZIndex" Value="{Binding Z}"/>
       
             <Setter Property="Transitions">                            
@@ -209,8 +209,6 @@
                     <TransformGroup>
                     <ScaleTransform ScaleX="{Binding CanvasScale}"
                                     ScaleY="{Binding CanvasScale}" />
-                    <TranslateTransform X="{Binding ActiveSection.ViewShiftX}" 
-                                        Y="{Binding ActiveSection.ViewShiftY}" />    
                     </TransformGroup>
                 </LayoutTransformControl.LayoutTransform>
                 

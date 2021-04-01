@@ -9,6 +9,7 @@ namespace BookShuffler.ViewModels
     {
         private IProjectCategories? _categories;
         private Point _position;
+        private Point _viewOffset;
         private int _z;
 
         public Guid Id => Model.Id;
@@ -16,7 +17,10 @@ namespace BookShuffler.ViewModels
         public IndexCardViewModel(IndexCard model)
         {
             this.Model = model;
+            _viewOffset = new Point(0, 0);
         }
+
+        public Point ViewPosition => _position + _viewOffset;
 
         /// <summary>
         /// Gets or sets (attaches) a set of categories defined by the project itself
@@ -53,7 +57,13 @@ namespace BookShuffler.ViewModels
         public Point Position
         {
             get => _position;
-            set => this.RaiseAndSetIfChanged(ref _position, value);
+            set
+            {
+                if (_position == value) return;
+                _position = value;
+                this.RaisePropertyChanged();
+                this.RaisePropertyChanged(nameof(ViewPosition));
+            }
         }
         
         public string Summary
@@ -101,5 +111,11 @@ namespace BookShuffler.ViewModels
         }
 
         public IndexCard Model { get; }
+
+        public void SetViewOffset(Point offset)
+        {
+            this._viewOffset = offset;
+            this.RaisePropertyChanged(nameof(ViewPosition));
+        }
     }
 }

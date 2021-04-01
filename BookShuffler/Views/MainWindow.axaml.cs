@@ -56,10 +56,7 @@ namespace BookShuffler.Views
                 var pointer = e.GetCurrentPoint(this);
                 var shift = pointer.Position - _dragStart;
                 _dragStart = pointer.Position;
-                foreach (var entity in this.ViewModel.ActiveSection.Entities)
-                {
-                    entity.Position += shift;
-                }
+                this.ViewModel?.ActiveSection?.IncrementChildrenOffset(shift);
             }
         }
 

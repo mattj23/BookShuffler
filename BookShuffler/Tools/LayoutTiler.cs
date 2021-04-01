@@ -20,6 +20,7 @@ namespace BookShuffler.Tools
             // Assumes that the size of each tile is 400x400
             var x = Spacing;
             var y = Spacing;
+            section.SetChildrenOffset(new Point(0, 0));
             foreach (var entity in section.Entities)
             {
                 if (x + TileWidth > width)

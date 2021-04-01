@@ -9,34 +9,27 @@ namespace BookShuffler.ViewModels
 {
     public class SectionViewModel : ViewModelBase, IEntityViewModel
     {
-        private Point _position;
+        private Point _position;            // The logical position of this entity
+        private Point _viewOffset;          // The offset of the this entity's *parent* section
+        private Point _childrenOffset;      // The offset of this section's children
         private readonly Entity _model;
-        private double _viewShiftX;
-        private double _viewShiftY;
         private int _z;
+        
 
+        public Point ViewPosition => _position + _viewOffset;
+        
         public SectionViewModel(Entity model)
         {
             _model = model;
             this.Entities = new ObservableCollection<IEntityViewModel>();
+            _childrenOffset = new Point(0, 0);
         }
 
         public SectionViewModel(string summary)
         {
             _model = new Entity {Id = Guid.NewGuid(), Summary = summary};
             this.Entities = new ObservableCollection<IEntityViewModel>();
-        }
-
-        public double ViewShiftX
-        {
-            get => _viewShiftX;
-            set => this.RaiseAndSetIfChanged(ref _viewShiftX, value);
-        }
-
-        public double ViewShiftY
-        {
-            get => _viewShiftY;
-            set => this.RaiseAndSetIfChanged(ref _viewShiftY, value);
+            _childrenOffset = new Point(0, 0);
         }
 
         public int Z
@@ -52,7 +45,13 @@ namespace BookShuffler.ViewModels
         public Point Position
         {
             get => _position;
-            set => this.RaiseAndSetIfChanged(ref _position, value);
+            set
+            {
+                if (_position == value) return;
+                _position = value;
+                this.RaisePropertyChanged();
+                this.RaisePropertyChanged(nameof(ViewPosition));
+            }
         }
 
         public string Summary
@@ -101,5 +100,24 @@ namespace BookShuffler.ViewModels
             child.Z = Entities.Max(e => e.Z) + 1;
         }
 
+        public void SetChildrenOffset(Point absolute)
+        {
+            this._childrenOffset = absolute;
+            foreach (var entity in this.Entities)
+            {
+                entity.SetViewOffset(absolute);
+            }
+        }
+
+        public void IncrementChildrenOffset(Point relative)
+        {
+            this.SetChildrenOffset(this._childrenOffset + relative);
+        }
+
+        public void SetViewOffset(Point offset)
+        {
+            this._viewOffset = offset;
+            this.RaisePropertyChanged(nameof(ViewPosition));
+        }
     }
 }
