@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Windows.Input;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -9,6 +10,7 @@ using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using BookShuffler.ViewModels;
 using MessageBox.Avalonia.Enums;
+using ReactiveUI;
 
 namespace BookShuffler.Views
 {
@@ -29,8 +31,9 @@ namespace BookShuffler.Views
 #if DEBUG
             this.AttachDevTools();
 #endif
+
         }
-        
+
         private AppViewModel? ViewModel => this.DataContext as AppViewModel;
 
         private void InitializeComponent()

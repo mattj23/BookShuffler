@@ -19,6 +19,8 @@
     <Window.KeyBindings>
         <KeyBinding Gesture="Ctrl+s" Command="{Binding SaveProjectCommand}" />
         <KeyBinding Gesture="Ctrl+Shift+T" Command="{Binding AutoTileActiveSectionCommand}" />
+        <KeyBinding Gesture="Ctrl+w" Command="{Binding LeftExpander.Toggle}" />
+        <KeyBinding Gesture="Ctrl+Shift+w" Command="{Binding RightExpander.Toggle}" />
     </Window.KeyBindings>
     
     <Window.Styles>
@@ -44,12 +46,13 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
         
         <!-- Main Application Menu -->
         <Menu Grid.Row="0"
               Grid.Column="0"
-              Grid.ColumnSpan="2">
+              Grid.ColumnSpan="5">
             <MenuItem Header="Project">
                 <MenuItem Header="_New" Click="NewProject_OnClick" />
                 <MenuItem Header="_Open"
@@ -88,114 +91,81 @@
         </Menu>
         
         <!-- Project Content Tree View -->
-        <Border Grid.Row="1"
-                Grid.Column="0"
-                BorderBrush="Black"
-                CornerRadius="2"
-                Padding="10"
-                Margin="2"
-                MaxWidth="500"
-                BorderThickness="2">
-            <LayoutTransformControl>
-                <LayoutTransformControl.LayoutTransform>
-                    <ScaleTransform ScaleX="{Binding TreeScale}"
-                                    ScaleY="{Binding TreeScale}" />
-                </LayoutTransformControl.LayoutTransform>
-                
-                <TabControl>
-                <TabItem Header="Project Entities">
+        <Expander Grid.Row="1"
+                  Grid.Column="0"
+                  IsExpanded="{Binding LeftExpander.IsExpanded}"
+                  VerticalAlignment="Stretch"
+                  ExpandDirection="Left">
 
-                    <TreeView MinWidth="50"
-                              Items="{Binding Project.RootEntity}"
-                              SelectedItem="{Binding SelectedEntity}">
+            <Border BorderBrush="Black"
+                    CornerRadius="2"
+                    Padding="10"
+                    Margin="2"
+                    BorderThickness="2">
 
-                        <TreeView.ContextMenu>
-                            <ContextMenu>
-                                <MenuItem Header="Detach Selected"
-                                          Command="{Binding DetachSelectedCommand}" />
-                                
-                                <Separator />
-                                
-                                <MenuItem Header="New Index Card"
-                                          Command="{Binding CreateCardCommand}" />
-                                
-                                <MenuItem Header="New Section"
-                                          Command="{Binding CreateSectionCommand}" />
+                <LayoutTransformControl>
+                    <LayoutTransformControl.LayoutTransform>
+                        <ScaleTransform ScaleX="{Binding TreeScale}"
+                                        ScaleY="{Binding TreeScale}" />
+                    </LayoutTransformControl.LayoutTransform>
 
-                                <Separator />
-                                
-                                <MenuItem Header="Open in Editor"
-                                          Command="{Binding LaunchEditorCommand}" />
-                                
-                                <MenuItem Header="Reload from File"
-                                          Command="{Binding LoadFromFileCommand}" />
+                    <DockPanel>
+                        <TextBlock DockPanel.Dock="Top"
+                                   Text="Project Content"
+                                   FontWeight="UltraBold" />
 
-                            </ContextMenu>
-                        </TreeView.ContextMenu>
+                        <TreeView Width="400"
+                                  DockPanel.Dock="Top"
+                                  Items="{Binding Project.RootEntity}"
+                                  SelectedItem="{Binding SelectedEntity}">
 
-                        <TreeView.DataTemplates>
-                            <!-- Section View Template -->
-                            <TreeDataTemplate DataType="vm:SectionViewModel"
-                                              ItemsSource="{Binding Entities}">
-                                <TextBlock Text="{Binding Summary}"
-                                           DoubleTapped="Section_OnDoubleTapped"
-                                           FontWeight="Bold" />
-                            </TreeDataTemplate>
+                            <TreeView.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="Detach Selected"
+                                              Command="{Binding DetachSelectedCommand}" />
 
-                            <!-- Index Card View Template -->
-                            <TreeDataTemplate DataType="vm:IndexCardViewModel">
-                                <TextBlock Text="{Binding Summary}" />
-                            </TreeDataTemplate>
+                                    <Separator />
 
-                        </TreeView.DataTemplates>
+                                    <MenuItem Header="New Index Card"
+                                              Command="{Binding CreateCardCommand}" />
 
-                    </TreeView>
+                                    <MenuItem Header="New Section"
+                                              Command="{Binding CreateSectionCommand}" />
 
-                </TabItem>
-                
-                <TabItem Header="Detached Entities">
+                                    <Separator />
 
-                    <TreeView MinWidth="50"
-                              Items="{Binding Unattached}"
-                              SelectedItem="{Binding SelectedDetachedEntity}">
+                                    <MenuItem Header="Open in Editor"
+                                              Command="{Binding LaunchEditorCommand}" />
 
-                        <TreeView.ContextMenu>
-                            <ContextMenu>
-                                <MenuItem Header="Attach Selected"
-                                          Command="{Binding AttachSelectedCommand}" />
-                                
-                                <Separator />
-                                
-                                <MenuItem Header="Delete"
-                                          Command="{Binding DeleteEntityCommand}" />
-                            </ContextMenu>
-                        </TreeView.ContextMenu>
+                                    <MenuItem Header="Reload from File"
+                                              Command="{Binding LoadFromFileCommand}" />
 
-                        <TreeView.DataTemplates>
-                            <!-- Section View Template -->
-                            <TreeDataTemplate DataType="vm:SectionViewModel"
-                                              ItemsSource="{Binding Entities}">
-                                <TextBlock Text="{Binding Summary}"
-                                           DoubleTapped="Section_OnDoubleTapped"
-                                           FontWeight="Bold" />
-                            </TreeDataTemplate>
+                                </ContextMenu>
+                            </TreeView.ContextMenu>
 
-                            <!-- Index Card View Template -->
-                            <TreeDataTemplate DataType="vm:IndexCardViewModel">
-                                <TextBlock Text="{Binding Summary}" />
-                            </TreeDataTemplate>
+                            <TreeView.DataTemplates>
+                                <!-- Section View Template -->
+                                <TreeDataTemplate DataType="vm:SectionViewModel"
+                                                  ItemsSource="{Binding Entities}">
+                                    <TextBlock Text="{Binding Summary}"
+                                               DoubleTapped="Section_OnDoubleTapped"
+                                               FontWeight="Bold" />
+                                </TreeDataTemplate>
 
-                        </TreeView.DataTemplates>
+                                <!-- Index Card View Template -->
+                                <TreeDataTemplate DataType="vm:IndexCardViewModel">
+                                    <TextBlock Text="{Binding Summary}" />
+                                </TreeDataTemplate>
 
-                    </TreeView>
+                            </TreeView.DataTemplates>
 
-                </TabItem>
-            </TabControl>
-            
-                
-            </LayoutTransformControl>
-        </Border>
+                        </TreeView>
 
+                    </DockPanel>
+                </LayoutTransformControl>
+            </Border>
+        </Expander>
+        
         <!-- Layout Editor -->
         <Border Grid.Row="1"
                Grid.Column="1"
@@ -236,6 +206,70 @@
             </LayoutTransformControl>
             
         </Border>
+        
+        <Expander Grid.Row="1"
+                  Grid.Column="2"
+                  IsExpanded="{Binding RightExpander.IsExpanded}"
+                  VerticalAlignment="Stretch"
+                  ExpandDirection="Right">
+            
+            <Border BorderBrush="Black"
+                    CornerRadius="2"
+                    Padding="10"
+                    Margin="2"
+                    BorderThickness="2">
+
+                <LayoutTransformControl>
+                    <LayoutTransformControl.LayoutTransform>
+                        <ScaleTransform ScaleX="{Binding TreeScale}"
+                                        ScaleY="{Binding TreeScale}" />
+                    </LayoutTransformControl.LayoutTransform>
+                    <DockPanel>
+                        <TextBlock DockPanel.Dock="Top"
+                                   Text="Detached Content"
+                                   FontWeight="UltraBold" />
+
+                        <TreeView Width="400"
+                                  DockPanel.Dock="Top"
+                                  Items="{Binding Project.DetachedEntities}"
+                                  SelectedItem="{Binding SelectedDetachedEntity}">
+
+                            <TreeView.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="Attach Selected"
+                                              Command="{Binding AttachSelectedCommand}" />
+
+                                    <Separator />
+
+                                    <MenuItem Header="Delete"
+                                              Command="{Binding DeleteEntityCommand}" />
+                                </ContextMenu>
+                            </TreeView.ContextMenu>
+
+                            <TreeView.DataTemplates>
+                                <!-- Section View Template -->
+                                <TreeDataTemplate DataType="vm:SectionViewModel"
+                                                  ItemsSource="{Binding Entities}">
+                                    <TextBlock Text="{Binding Summary}"
+                                               DoubleTapped="Section_OnDoubleTapped"
+                                               FontWeight="Bold" />
+                                </TreeDataTemplate>
+
+                                <!-- Index Card View Template -->
+                                <TreeDataTemplate DataType="vm:IndexCardViewModel">
+                                    <TextBlock Text="{Binding Summary}" />
+                                </TreeDataTemplate>
+
+                            </TreeView.DataTemplates>
+
+                        </TreeView>
+
+                    </DockPanel>
+
+
+                </LayoutTransformControl>
+            </Border>
+        </Expander>
         
     </Grid>
 

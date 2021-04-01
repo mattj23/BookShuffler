@@ -64,6 +64,9 @@ namespace BookShuffler.ViewModels
 
             this.AutoTileActiveSectionCommand = ReactiveCommand.Create(this.AutoTileActiveSection);
 
+            this.LeftExpander = new ToggleExpanderViewModel();
+            this.RightExpander = new ToggleExpanderViewModel();
+
             this.CanvasScale = 1;
             this.TreeScale = 1;
 
@@ -77,6 +80,9 @@ namespace BookShuffler.ViewModels
         }
 
         public AppSettings Settings { get; private set; }
+        
+        public ToggleExpanderViewModel LeftExpander { get; }
+        public ToggleExpanderViewModel RightExpander { get; }
 
         public ProjectViewModel? Project
         {
