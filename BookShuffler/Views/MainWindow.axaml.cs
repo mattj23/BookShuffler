@@ -8,6 +8,7 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
+using BookShuffler.Models;
 using BookShuffler.ViewModels;
 using MessageBox.Avalonia.Enums;
 using ReactiveUI;
@@ -205,8 +206,25 @@ namespace BookShuffler.Views
         {
             if (this.ViewModel is not null)
             {
+                this.RegisterKeyBindings(this.ViewModel.Settings.KeyBindings);
                 this.ViewModel.GetCanvasBounds = () => _layoutContainer.Bounds;
             }
+        }
+
+        private void RegisterKeyBindings(KeyboardShortcuts shortcut)
+        {
+            this.KeyBindings.Clear();
+            this.Register(this.ViewModel.LeftExpander.Toggle, shortcut.ExpandProject);
+            this.Register(this.ViewModel.RightExpander.Toggle, shortcut.ExpandDetached);
+            this.Register(this.ViewModel.SaveProjectCommand, shortcut.SaveProject);
+            this.Register(this.ViewModel.AutoTileActiveSectionCommand, shortcut.AutoArrange);
+            this.Register(this.ViewModel.AttachSelectedCommand, shortcut.AttachSelected);
+            this.Register(this.ViewModel.DetachSelectedCommand, shortcut.DetachSelected);
+        }
+
+        private void Register(ICommand c, string s)
+        {
+            this.KeyBindings.Add(new KeyBinding {Command = c, Gesture = KeyGesture.Parse(s)});
         }
     }
 }

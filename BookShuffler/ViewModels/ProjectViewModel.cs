@@ -130,10 +130,10 @@ namespace BookShuffler.ViewModels
             foreach (var entity in loaded.Unattached) DetachedEntities.Add(entity);
         }
 
-        public void DetachEntity(IEntityViewModel? entity)
+        public IEntityViewModel DetachEntity(IEntityViewModel? entity)
         {
-            if (entity is null) return;
-            if (entity == _root) return;
+            if (entity is null) return null;
+            if (entity == _root) return null;
             
             if (!_allEntities.ContainsKey(entity.Id)) throw new ArgumentException("Entity isn't part of this project");
 
@@ -142,6 +142,7 @@ namespace BookShuffler.ViewModels
 
             parent.Entities.Remove(entity);
             this.DetachedEntities.Add(entity);
+            return entity;
         }
 
         public void AttachEntity(IEntityViewModel? entity, SectionViewModel? newParent)

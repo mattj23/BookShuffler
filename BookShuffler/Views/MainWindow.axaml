@@ -15,14 +15,7 @@
     <Design.DataContext>
         <vm:AppViewModel/>
     </Design.DataContext>
-    
-    <Window.KeyBindings>
-        <KeyBinding Gesture="Ctrl+s" Command="{Binding SaveProjectCommand}" />
-        <KeyBinding Gesture="Ctrl+Shift+T" Command="{Binding AutoTileActiveSectionCommand}" />
-        <KeyBinding Gesture="Ctrl+w" Command="{Binding LeftExpander.Toggle}" />
-        <KeyBinding Gesture="Ctrl+Shift+w" Command="{Binding RightExpander.Toggle}" />
-    </Window.KeyBindings>
-    
+
     <Window.Styles>
         <Style Selector="ItemsControl > ContentPresenter">
             <Setter Property="Canvas.Left" Value="{Binding ViewPosition.X}"/>

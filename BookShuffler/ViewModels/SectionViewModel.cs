@@ -14,7 +14,8 @@ namespace BookShuffler.ViewModels
         private Point _childrenOffset;      // The offset of this section's children
         private readonly Entity _model;
         private int _z;
-        
+        private bool _isExpanded;
+
 
         public Point ViewPosition => _position + _viewOffset;
         
@@ -30,6 +31,12 @@ namespace BookShuffler.ViewModels
             _model = new Entity {Id = Guid.NewGuid(), Summary = summary};
             this.Entities = new ObservableCollection<IEntityViewModel>();
             _childrenOffset = new Point(0, 0);
+        }
+
+        public bool IsExpanded
+        {
+            get => _isExpanded;
+            set => this.RaiseAndSetIfChanged(ref _isExpanded, value);
         }
 
         public int Z

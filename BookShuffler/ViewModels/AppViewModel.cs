@@ -50,7 +50,12 @@ namespace BookShuffler.ViewModels
             _selectedIsSectionSubject = new BehaviorSubject<bool>(false);
 
             // this.SaveProjectCommand = ReactiveCommand.Create(this.SaveProject);
-            this.DetachSelectedCommand = ReactiveCommand.Create(() => this.Project?.DetachEntity(this.SelectedEntity));
+            this.DetachSelectedCommand = ReactiveCommand.Create(() =>
+            {
+                var detached = this.Project?.DetachEntity(this.SelectedEntity);
+                if (detached is not null) this.SelectedDetachedEntity = detached;
+            });
+            
             this.AttachSelectedCommand = ReactiveCommand.Create(() =>
                 this.Project?.AttachEntity(this.SelectedDetachedEntity, this.ActiveSection));
 
@@ -219,6 +224,7 @@ namespace BookShuffler.ViewModels
             var result = loader.Load(projectFolder);
 
             this.Project = ProjectViewModel.FromLoad(result);
+            this.SelectedEntity = this.Project.Root;
         }
 
         /// <summary>
