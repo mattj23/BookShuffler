@@ -39,17 +39,21 @@ namespace BookShuffler.ViewModels
 
         private readonly IStorageProvider _storage;
 
-        public AppViewModel() : this(new FileSystemStorage()) {}
+        public AppViewModel() : this(new FileSystemStorage())
+        {
+        }
 
         public AppViewModel(IStorageProvider storage)
         {
             _storage = storage;
-            
+
             _selectedIsSectionSubject = new BehaviorSubject<bool>(false);
 
             // this.SaveProjectCommand = ReactiveCommand.Create(this.SaveProject);
-            this.DetachSelectedCommand = ReactiveCommand.Create(this.DetachSelected);
-            this.AttachSelectedCommand = ReactiveCommand.Create(this.AttachSelected);
+            this.DetachSelectedCommand = ReactiveCommand.Create(() => this.Project?.DetachEntity(this.SelectedEntity));
+            this.AttachSelectedCommand = ReactiveCommand.Create(() =>
+                this.Project?.AttachEntity(this.SelectedDetachedEntity, this.ActiveSection));
+
             this.LaunchEditorCommand = ReactiveCommand.Create(this.LaunchEditorOnSelected);
             this.LoadFromFileCommand = ReactiveCommand.Create(this.LoadSelectedFromFile);
             this.DeleteEntityCommand = ReactiveCommand.Create(this.DeleteSelected);
@@ -62,17 +66,18 @@ namespace BookShuffler.ViewModels
             this.SetCanvasScale = ReactiveCommand.Create<string>(d => this.SetCanvasScaleValue(double.Parse(d)));
             this.SetTreeScale = ReactiveCommand.Create<string>(d => this.SetTreeScaleValue(double.Parse(d)));
 
-            this.AutoTileActiveSectionCommand = ReactiveCommand.Create(this.AutoTileActiveSection);
+            this.AutoTileActiveSectionCommand = ReactiveCommand.Create(() =>
+                this.ActiveSection?.AutoTile(this.GetCanvasBounds?.Invoke().Width ?? 1200));
 
-            this.LeftExpander = new ToggleExpanderViewModel();
-            this.RightExpander = new ToggleExpanderViewModel();
 
+            this.LeftExpander = new ToggleExpanderViewModel {IsExpanded = true};
+            this.RightExpander = new ToggleExpanderViewModel {IsExpanded = true};
             this.CanvasScale = 1;
             this.TreeScale = 1;
 
             this.LoadSettings();
 
-            if (!string.IsNullOrEmpty(this.Settings?.LastOpenedProject) 
+            if (!string.IsNullOrEmpty(this.Settings?.LastOpenedProject)
                 && File.Exists(this.Settings.LastOpenedProject))
             {
                 this.OpenProject(this.Settings.LastOpenedProject);
@@ -80,7 +85,7 @@ namespace BookShuffler.ViewModels
         }
 
         public AppSettings Settings { get; private set; }
-        
+
         public ToggleExpanderViewModel LeftExpander { get; }
         public ToggleExpanderViewModel RightExpander { get; }
 
@@ -91,7 +96,7 @@ namespace BookShuffler.ViewModels
             {
                 if (_project == value) return;
                 _unsavedSubscription?.Dispose();
-                
+
                 _project = value;
                 _unsavedSubscription = _project.WhenAnyValue(x => x.HasUnsavedChanges)
                     .Subscribe(_ => this.RaisePropertyChanged(nameof(AppTitle)));
@@ -115,7 +120,7 @@ namespace BookShuffler.ViewModels
         public ICommand CreateSectionCommand { get; }
 
         public ICommand AutoTileActiveSectionCommand { get; }
-        
+
         public double CanvasScale
         {
             get => _canvasScale;
@@ -183,8 +188,8 @@ namespace BookShuffler.ViewModels
                 else
                 {
                     // Otherwise this is an index card
-                    // var parent = this.BruteForceFindParent(_selectedEntity.Id, _projectRoot);
-                    // if (parent is not null) this.ActiveSection = parent;
+                    var parent = this.Project?.GetParent(_selectedEntity);
+                    if (parent is not null) this.ActiveSection = parent;
                     this.ActiveSection?.BringChildToFront(_selectedEntity);
                 }
             }
@@ -208,11 +213,11 @@ namespace BookShuffler.ViewModels
             {
                 projectFolder = new FileInfo(projectFolder).DirectoryName!;
             }
-            
+
             // TODO: Error catching
             var loader = new ProjectLoader(_storage);
             var result = loader.Load(projectFolder);
-            
+
             this.Project = ProjectViewModel.FromLoad(result);
         }
 
@@ -234,11 +239,6 @@ namespace BookShuffler.ViewModels
             this.ActiveSection?.ResortOrder();
         }
 
-        private void AutoTileActiveSection()
-        {
-            this.ActiveSection?.AutoTile(this.GetCanvasBounds?.Invoke().Width ?? 1200);
-        }
-
         private void LoadSettings()
         {
             var folder = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
@@ -250,7 +250,7 @@ namespace BookShuffler.ViewModels
             {
                 var des = new YamlDotNet.Serialization.Deserializer();
                 this.Settings = des.Deserialize<AppSettings>(File.ReadAllText(filePath));
-                
+
                 // Apply the loaded settings
                 if (this.Settings.CanvasScale is not null) this.CanvasScale = this.Settings.CanvasScale.Value;
                 if (this.Settings.ProjectTreeScale is not null) this.CanvasScale = this.Settings.ProjectTreeScale.Value;
@@ -267,37 +267,6 @@ namespace BookShuffler.ViewModels
                 "BookShuffler", "settings.yaml");
             var ser = new YamlDotNet.Serialization.Serializer();
             File.WriteAllText(filePath, ser.Serialize(this.Settings));
-        }
-
-
-        private void DetachSelected()
-        {
-            if (this.SelectedEntity is null) return;
-            if (this.SelectedEntity == _projectRoot) return;
-
-            // var parent = this.BruteForceFindParent(this.SelectedEntity.Id, _projectRoot);
-
-            // if (parent is not null)
-            // {
-            //     parent.Entities.Remove(this.SelectedEntity);
-            //     this.Unattached.Add(this.SelectedEntity);
-            //     this.SelectedEntity = parent;
-            // }
-        }
-
-
-        private void AttachSelected()
-        {
-            if (this.SelectedDetachedEntity is null) return;
-            if (this.ActiveSection is null) return;
-
-            var working = this.SelectedDetachedEntity;
-            // this.RemoveFromDetached(working);
-
-            working.Position = new Point(0, 0);
-            this.ActiveSection.Entities.Add(working);
-            this.ActiveSection.BringChildToFront(working);
-            this.SelectedDetachedEntity = null;
         }
 
         private void AddCardToSelected()
@@ -397,7 +366,7 @@ namespace BookShuffler.ViewModels
             this.Settings.CanvasScale = d;
             this.SaveSettings();
         }
-        
+
         private void SetTreeScaleValue(double d)
         {
             this.TreeScale = d;

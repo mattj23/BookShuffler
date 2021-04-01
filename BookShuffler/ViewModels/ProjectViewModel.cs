@@ -130,8 +130,11 @@ namespace BookShuffler.ViewModels
             foreach (var entity in loaded.Unattached) DetachedEntities.Add(entity);
         }
 
-        public void DetachEntity(IEntityViewModel entity)
+        public void DetachEntity(IEntityViewModel? entity)
         {
+            if (entity is null) return;
+            if (entity == _root) return;
+            
             if (!_allEntities.ContainsKey(entity.Id)) throw new ArgumentException("Entity isn't part of this project");
 
             var parent = this.BruteForceFindParent(entity.Id, this.Root);
@@ -139,6 +142,28 @@ namespace BookShuffler.ViewModels
 
             parent.Entities.Remove(entity);
             this.DetachedEntities.Add(entity);
+        }
+
+        public void AttachEntity(IEntityViewModel? entity, SectionViewModel? newParent)
+        {
+            if (entity is null) return;
+            if (newParent is null) return;
+            
+            // Find the entity in the detached
+            var located = this.RemoveFromDetached(entity);
+            if (located is null) return;
+            
+            newParent.Entities.Add(entity);
+        }
+
+        /// <summary>
+        /// Attempt to find the parent section of an entity in the attached project tree.
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns></returns>
+        public SectionViewModel? GetParent(IEntityViewModel entity)
+        {
+            return this.BruteForceFindParent(entity.Id, this.Root);
         }
 
         /// <summary>
@@ -160,6 +185,31 @@ namespace BookShuffler.ViewModels
                 .Subscribe(_ => this.HasUnsavedChanges = true));
             _entitySubscriptions.Add(viewModel.WhenAnyValue(e => e.Position)
                 .Subscribe(_ => this.HasUnsavedChanges = true));
+        }
+
+        /// <summary>
+        /// Find the given entity in the detached collection and remove it. The entity may be a top level member of
+        /// the collection or may be a child of one of the top level members.
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns>the removed entity, or null if none was found</returns>
+        private IEntityViewModel? RemoveFromDetached(IEntityViewModel entity)
+        {
+            if (this.DetachedEntities.Contains(entity))
+            {
+                this.DetachedEntities.Remove(entity);
+                return entity;
+            }
+
+            foreach (var possible in this.DetachedEntities)
+            {
+                var parent = this.BruteForceFindParent(entity.Id, possible);
+                if (parent is null) continue;
+                parent.Entities.Remove(entity);
+                return entity;
+            }
+
+            return null;
         }
 
         /// <summary>
