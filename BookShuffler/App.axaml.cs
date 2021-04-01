@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using BookShuffler.Tools.Storage;
 using BookShuffler.ViewModels;
 using BookShuffler.Views;
 
@@ -17,9 +18,10 @@ namespace BookShuffler
         {
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
+                var storage = new FileSystemStorage();
                 desktop.MainWindow = new MainWindow
                 {
-                    DataContext = new AppViewModel(),
+                    DataContext = new AppViewModel(storage),
                 };
             }
 

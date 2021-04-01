@@ -134,7 +134,7 @@ namespace BookShuffler.Views
             var dialog = new OpenFileDialog
             {
                 AllowMultiple = true,
-                Directory = ViewModel.ProjectPath,
+                Directory = ViewModel.Project.ProjectFolder,
                 Title = "Select Markdown File(s)",
                 Filters = new List<FileDialogFilter>{new FileDialogFilter()
                 {
@@ -182,7 +182,7 @@ namespace BookShuffler.Views
 
         private async void Window_OnClosing(object? sender, CancelEventArgs e)
         {
-            if (_forceClose || this.ViewModel?.HasUnsavedChanges != true) return;
+            if (_forceClose || this.ViewModel?.Project?.HasUnsavedChanges != true) return;
             
             // This is arranged in this way because Avalonia does not wait for this to complete as an asynchronous
             // method and will not accept async Task as a method signature. Thus when reaching the await the window

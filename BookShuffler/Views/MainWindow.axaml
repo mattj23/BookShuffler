@@ -106,7 +106,7 @@
                 <TabItem Header="Project Entities">
 
                     <TreeView MinWidth="50"
-                              Items="{Binding RootItem}"
+                              Items="{Binding Project.RootEntity}"
                               SelectedItem="{Binding SelectedEntity}">
 
                         <TreeView.ContextMenu>

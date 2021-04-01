@@ -14,6 +14,7 @@ using Avalonia.Controls.Shapes;
 using BookShuffler.Models;
 using BookShuffler.Tools;
 using BookShuffler.Tools.MarkdownImport;
+using BookShuffler.Tools.Storage;
 using ReactiveUI;
 using YamlDotNet.RepresentationModel;
 using Path = System.IO.Path;
@@ -26,24 +27,25 @@ namespace BookShuffler.ViewModels
         private SectionViewModel _projectRoot;
         private SectionViewModel _activeSection;
         private IEntityViewModel? _selectedEntity;
-        private double _canvasTop;
-        private double _canvasLeft;
         private IEntityViewModel? _selectedDetachedEntity;
 
         private readonly BehaviorSubject<bool> _selectedIsSectionSubject;
         private double _canvasScale;
         private double _treeScale;
-        private bool _hasUnsavedChanges;
         private readonly List<IEntityViewModel> _allEntities = new List<IEntityViewModel>();
         private readonly List<IDisposable> _entitySubscriptions = new List<IDisposable>();
         private ProjectViewModel? _project;
+        private IDisposable? _unsavedSubscription;
 
-        public AppViewModel()
+        private readonly IStorageProvider _storage;
+
+        public AppViewModel() : this(new FileSystemStorage()) {}
+
+        public AppViewModel(IStorageProvider storage)
         {
+            _storage = storage;
+            
             _selectedIsSectionSubject = new BehaviorSubject<bool>(false);
-
-            this.RootItem = new ObservableCollection<IEntityViewModel>();
-            this.Unattached = new ObservableCollection<IEntityViewModel>();
 
             // this.SaveProjectCommand = ReactiveCommand.Create(this.SaveProject);
             this.DetachSelectedCommand = ReactiveCommand.Create(this.DetachSelected);
@@ -67,10 +69,11 @@ namespace BookShuffler.ViewModels
 
             this.LoadSettings();
 
-            // if (File.Exists(this.Settings.LastOpenedProject))
-            // {
-            //     this.OpenProject(this.Settings.LastOpenedProject);
-            // }
+            if (!string.IsNullOrEmpty(this.Settings?.LastOpenedProject) 
+                && File.Exists(this.Settings.LastOpenedProject))
+            {
+                this.OpenProject(this.Settings.LastOpenedProject);
+            }
         }
 
         public AppSettings Settings { get; private set; }
@@ -78,7 +81,17 @@ namespace BookShuffler.ViewModels
         public ProjectViewModel? Project
         {
             get => _project;
-            set => this.RaiseAndSetIfChanged(ref _project, value);
+            private set
+            {
+                if (_project == value) return;
+                _unsavedSubscription?.Dispose();
+                
+                _project = value;
+                _unsavedSubscription = _project.WhenAnyValue(x => x.HasUnsavedChanges)
+                    .Subscribe(_ => this.RaisePropertyChanged(nameof(AppTitle)));
+                this.RaisePropertyChanged();
+                this.RaisePropertyChanged(nameof(AppTitle));
+            }
         }
 
         public ICommand SetCanvasScale { get; }
@@ -96,6 +109,7 @@ namespace BookShuffler.ViewModels
         public ICommand CreateSectionCommand { get; }
 
         public ICommand AutoTileActiveSectionCommand { get; }
+        
         public double CanvasScale
         {
             get => _canvasScale;
@@ -108,18 +122,6 @@ namespace BookShuffler.ViewModels
             set => this.RaiseAndSetIfChanged(ref _treeScale, value);
         }
 
-        public bool HasUnsavedChanges
-        {
-            get => _hasUnsavedChanges;
-            set
-            {
-                if (value == _hasUnsavedChanges) return;
-                _hasUnsavedChanges = value;
-                this.RaisePropertyChanged(nameof(HasUnsavedChanges));
-                this.RaisePropertyChanged(nameof(AppTitle));
-            }
-        }
-
         /// <summary>
         /// Gets a function which returns the canvas boundaries. This is necessary because binding OneWayToSource on
         /// a property in the XAML is currently broken in Avalonia.
@@ -127,41 +129,22 @@ namespace BookShuffler.ViewModels
         public Func<Rect> GetCanvasBounds { get; set; }
 
         /// <summary>
-        /// Gets a collection that should contain only the single root element of the project.
-        /// </summary>
-        public ObservableCollection<IEntityViewModel> RootItem { get; }
-
-        /// <summary>
-        /// Gets a collection of all of the unattached entities in the project
-        /// </summary>
-        public ObservableCollection<IEntityViewModel> Unattached { get; }
-
-        /// <summary>
-        /// Gets the path of the actively loaded project. The application also uses this to determine whether or not
-        /// a project is loaded in the interface.
-        /// </summary>
-        public string? ProjectPath
-        {
-            get => _projectPath;
-            set
-            {
-                this.RaiseAndSetIfChanged(ref _projectPath, value);
-                this.RaisePropertyChanged(nameof(HasActiveProject));
-                this.RaisePropertyChanged(nameof(AppTitle));
-            }
-        }
-
-        /// <summary>
         /// Gets whether or not there is an actively loaded project based on the value of ProjectPath
         /// </summary>
-        public bool HasActiveProject => !string.IsNullOrEmpty(this.ProjectPath);
+        public bool HasActiveProject => this.Project is not null;
 
         /// <summary>
         /// Gets the title of the application window
         /// </summary>
-        public string AppTitle =>
-            (!this.HasActiveProject ? "Book Shuffler [no project]" : $"Book Shuffler [{ProjectPath}]") +
-            (this.HasUnsavedChanges ? " (unsaved changes)" : string.Empty);
+        public string AppTitle
+        {
+            get
+            {
+                if (this.Project is null) return "Book Shuffler [no project]";
+                return $"Book Shuffler [{this.Project.ProjectFolder}]" +
+                       (this.Project.HasUnsavedChanges ? " (unsaved changes)" : string.Empty);
+            }
+        }
 
         /// <summary>
         /// The actively selected *SectionView* element, which is the last item in the project tree which was clicked
@@ -205,6 +188,26 @@ namespace BookShuffler.ViewModels
         {
             get => _selectedDetachedEntity;
             set => this.RaiseAndSetIfChanged(ref _selectedDetachedEntity, value);
+        }
+
+        /// <summary>
+        /// Opens a project from the storage provider
+        /// </summary>
+        public void OpenProject(string projectFolder)
+        {
+            if (string.IsNullOrEmpty(projectFolder))
+                throw new ArgumentException("An empty project file/folder was provided");
+
+            if (File.Exists(projectFolder) && projectFolder.EndsWith(".yaml"))
+            {
+                projectFolder = new FileInfo(projectFolder).DirectoryName!;
+            }
+            
+            // TODO: Error catching
+            var loader = new ProjectLoader(_storage);
+            var result = loader.Load(projectFolder);
+            
+            this.Project = ProjectViewModel.FromLoad(result);
         }
 
         /// <summary>
@@ -276,23 +279,6 @@ namespace BookShuffler.ViewModels
             // }
         }
 
-        private void RemoveFromDetached(IEntityViewModel target)
-        {
-            // if (this.Unattached.Contains(target))
-            // {
-            //     this.Unattached.Remove(target);
-            // }
-            // else
-            // {
-            //     foreach (var entity in this.Unattached)
-            //     {
-            //         var parent = this.BruteForceFindParent(target.Id, entity);
-            //         if (parent is null) continue;
-            //         parent.Entities.Remove(target);
-            //         break;
-            //     }
-            // }
-        }
 
         private void AttachSelected()
         {
@@ -300,7 +286,7 @@ namespace BookShuffler.ViewModels
             if (this.ActiveSection is null) return;
 
             var working = this.SelectedDetachedEntity;
-            this.RemoveFromDetached(working);
+            // this.RemoveFromDetached(working);
 
             working.Position = new Point(0, 0);
             this.ActiveSection.Entities.Add(working);
@@ -395,7 +381,7 @@ namespace BookShuffler.ViewModels
         private void DeleteSelected()
         {
             if (this.SelectedDetachedEntity is null) return;
-            this.RemoveFromDetached(this.SelectedDetachedEntity);
+            // this.RemoveFromDetached(this.SelectedDetachedEntity);
             this.SelectedDetachedEntity = null;
         }
 

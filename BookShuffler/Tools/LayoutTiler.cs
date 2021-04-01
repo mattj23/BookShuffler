@@ -7,7 +7,7 @@ using BookShuffler.ViewModels;
 namespace BookShuffler.Tools
 {
     /// <summary>
-    /// Tool to perform the tiling layout of a section's contents
+    ///     Tool to perform the tiling layout of a section's contents
     /// </summary>
     public static class LayoutTiler
     {
@@ -18,8 +18,8 @@ namespace BookShuffler.Tools
         public static void AutoTile(this SectionViewModel section, double width)
         {
             // Assumes that the size of each tile is 400x400
-            double x = Spacing;
-            double y = Spacing;
+            var x = Spacing;
+            var y = Spacing;
             foreach (var entity in section.Entities)
             {
                 if (x + TileWidth > width)
@@ -54,5 +54,4 @@ namespace BookShuffler.Tools
             }
         }
     }
-    
 }

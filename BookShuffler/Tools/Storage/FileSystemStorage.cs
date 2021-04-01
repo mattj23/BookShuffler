@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace BookShuffler.Tools.Storage
 {
-    public class FileSystem : IStorageProvider
+    public class FileSystemStorage : IStorageProvider
     {
         public string Get(string path)
         {
@@ -24,11 +24,6 @@ namespace BookShuffler.Tools.Storage
             return Directory.EnumerateFiles(path).ToArray();
         }
 
-        public string PrefixOf(string path)
-        {
-            return new FileInfo(path).DirectoryName ?? throw new InvalidOperationException();
-        }
-
         public string Join(params string[] s)
         {
             return Path.Combine(s);
@@ -42,12 +37,12 @@ namespace BookShuffler.Tools.Storage
                 return;
             }
 
-            if (Directory.Exists(path))
-            {
-                Directory.Delete(path);
-            }
-
+            if (Directory.Exists(path)) Directory.Delete(path);
         }
-        
+
+        public string PrefixOf(string path)
+        {
+            return new FileInfo(path).DirectoryName ?? throw new InvalidOperationException();
+        }
     }
 }
