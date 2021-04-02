@@ -47,26 +47,24 @@
               Grid.Column="0"
               Grid.ColumnSpan="5">
             <MenuItem Header="Project">
-                <MenuItem Header="_New" Click="NewProject_OnClick" />
+                <MenuItem Header="New" 
+                          Command="{Binding Commands.NewProject}"/>
                 <MenuItem Header="_Open"
-                          Click="OpenProject_OnClick"/>
+                          Command="{Binding Commands.OpenProject}"/>
                 <Separator />
                 <MenuItem Header="_Save"
-                          Command="{Binding SaveProjectCommand}"
-                          IsEnabled="{Binding HasActiveProject}" />
+                          Command="{Binding Commands.SaveProject}" />
                 <Separator />
                 <MenuItem Header="Edit Project Categories"
-                          Command="{Binding EditCategoryCommand}"
-                          IsEnabled="{Binding HasActiveProject}" />
+                          Command="{Binding Commands.EditCategories}" />
                 <Separator />
-                <MenuItem Header="Import Tagged Markdown"
-                          IsEnabled="{Binding HasActiveProject}"
-                          Click="ImportTaggedMarkdown_OnClick" />
+                <MenuItem Header="Import Tagged Markdown" 
+                          Command="{Binding Commands.ImportMarkdown}"/>
             </MenuItem>
 
             <MenuItem Header="View">
                 <MenuItem Header="Auto Tile"
-                          Command="{Binding AutoTileActiveSectionCommand}" />
+                          Command="{Binding Commands.AutoArrange}" />
                 
                 <MenuItem Header="Canvas Scale">
                     <MenuItem Header="40%" Command="{Binding SetCanvasScale}" CommandParameter="0.4" />

@@ -36,8 +36,9 @@ namespace BookShuffler.Views
             this.AttachDevTools();
 #endif
 
+            // Register interactions to the various handlers
             this.WhenActivated(d => d(ViewModel.EditCategories.RegisterHandler(DoEditCategoriesAsync)));
-
+            this.WhenActivated(d => d(ViewModel.NewProject.RegisterHandler(DoSelectNewFolder)));
         }
 
         private AppViewModel? ViewModel => this.DataContext as AppViewModel;
@@ -47,6 +48,9 @@ namespace BookShuffler.Views
             AvaloniaXamlLoader.Load(this);
             _layoutContainer = this.FindControl<ItemsControl>("LayoutContainer");
         }
+        
+        // Interactions 
+        // ======================================================================================================
 
         private async Task DoEditCategoriesAsync(InteractionContext<ProjectCategories, Unit> interaction)
         {
@@ -56,6 +60,33 @@ namespace BookShuffler.Views
             interaction.SetOutput(default);
         }
 
+        private async Task DoSelectNewFolder(InteractionContext<Unit, string?> interaction)
+        {
+            var dialog = new OpenFolderDialog
+            {
+                Title = "Select Location for New Project"
+            };
+
+            var result = await dialog.ShowAsync(this);
+            interaction.SetOutput(result);
+        }
+
+        private async Task DoOpenProjectAsync(InteractionContext<Unit, string?> interaction)
+        {
+            var dialog = new OpenFileDialog
+            {
+                Directory = ViewModel?.Project?.ProjectFolder,
+                Title = "Select project.yaml File",
+                Filters = new List<FileDialogFilter>{new()
+                {
+                    Extensions = {"yml", "yaml"},
+                    Name = "Project YAML File"
+                }}
+            };
+            
+            var result = await dialog.ShowAsync(this);
+            interaction.SetOutput(result?.FirstOrDefault());
+        }
         private void LayoutContainer_OnPointerPressed(object? sender, PointerPressedEventArgs e)
         {
             var pointer = e.GetCurrentPoint(this);
@@ -125,23 +156,7 @@ namespace BookShuffler.Views
                 this.ViewModel.ResortActiveSection();
             }
         }
-
-        private async void NewProject_OnClick(object? sender, RoutedEventArgs e)
-        {
-            this.ViewModel.GetCanvasBounds = () => _layoutContainer.Bounds;
-            
-            var dialog = new OpenFolderDialog
-            {
-                Title = "Select Location for New Project"
-            };
-
-            var result = await dialog.ShowAsync(this);
-
-            if (string.IsNullOrEmpty(result)) return;
-
-            // this.ViewModel.NewProject(result);
-        }
-
+        
         private async void ImportTaggedMarkdown_OnClick(object? sender, RoutedEventArgs e)
         {
             var dialog = new OpenFileDialog
@@ -163,25 +178,6 @@ namespace BookShuffler.Views
             }
         }
 
-        private async void OpenProject_OnClick(object? sender, RoutedEventArgs e)
-        {
-            var dialog = new OpenFileDialog
-            {
-                Directory = ViewModel?.Project?.ProjectFolder,
-                Title = "Select project.yaml File",
-                Filters = new List<FileDialogFilter>{new()
-                {
-                    Extensions = {"yml", "yaml"},
-                    Name = "Project YAML File"
-                }}
-            };
-            
-            var result = await dialog.ShowAsync(this);
-            
-            if (string.IsNullOrEmpty(result?.FirstOrDefault())) return;
-            
-            this.ViewModel?.OpenProject(result.First());
-        }
 
         private void Section_OnDoubleTapped(object? sender, RoutedEventArgs e)
         {
@@ -226,8 +222,8 @@ namespace BookShuffler.Views
             this.KeyBindings.Clear();
             this.Register(this.ViewModel.LeftExpander.Toggle, shortcut.ExpandProject);
             this.Register(this.ViewModel.RightExpander.Toggle, shortcut.ExpandDetached);
-            this.Register(this.ViewModel.SaveProjectCommand, shortcut.SaveProject);
-            this.Register(this.ViewModel.AutoTileActiveSectionCommand, shortcut.AutoArrange);
+            this.Register(this.ViewModel.Commands.SaveProject, shortcut.SaveProject);
+            this.Register(this.ViewModel.Commands.AutoArrange, shortcut.AutoArrange);
             this.Register(this.ViewModel.AttachSelectedCommand, shortcut.AttachSelected);
             this.Register(this.ViewModel.DetachSelectedCommand, shortcut.DetachSelected);
         }

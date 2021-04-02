@@ -29,6 +29,7 @@ namespace BookShuffler.ViewModels
         private IEntityViewModel? _selectedDetachedEntity;
 
         private readonly BehaviorSubject<bool> _selectedIsSectionSubject;
+        private readonly BehaviorSubject<bool> _activeProjectSubject;
         private double _canvasScale;
         private double _treeScale;
         private ProjectViewModel? _project;
@@ -45,21 +46,41 @@ namespace BookShuffler.ViewModels
             _storage = storage;
 
             _selectedIsSectionSubject = new BehaviorSubject<bool>(false);
+            _activeProjectSubject = new BehaviorSubject<bool>(false);
 
             // Commands 
             // ====================================================================================
-            this.SaveProjectCommand = ReactiveCommand.Create(this.SaveProject);
-            
+            this.Commands = new MainWindowCommands
+            {
+                NewProject = ReactiveCommand.Create(async () =>
+                {
+                    var result = await NewProject.Handle(default);
+                    if (!string.IsNullOrEmpty(result)) this.New(result);
+                }),
+
+                OpenProject = ReactiveCommand.Create(async () =>
+                {
+                    var result = await OpenProject.Handle(default);
+                    if (!string.IsNullOrEmpty(result)) this.Open(result);
+                }),
+                
+                SaveProject = ReactiveCommand.Create(this.SaveProject, _activeProjectSubject),
+
+                AutoArrange = ReactiveCommand.Create(
+                    () => this.ActiveSection?.AutoTile(this.GetCanvasBounds?.Invoke().Width ?? 1200),
+                    _selectedIsSectionSubject),
+            };
+
             this.DetachSelectedCommand = ReactiveCommand.Create(() =>
             {
                 var detached = this.Project?.DetachEntity(this.SelectedEntity);
                 if (detached is not null) this.SelectedDetachedEntity = detached;
                 this.SelectedEntity = null;
             });
-            
+
             this.AttachSelectedCommand = ReactiveCommand.Create(() =>
             {
-                var attached =this.Project?.AttachEntity(this.SelectedDetachedEntity, this.ActiveSection);
+                var attached = this.Project?.AttachEntity(this.SelectedDetachedEntity, this.ActiveSection);
                 if (attached is not null)
                 {
                     this.SelectedEntity = attached;
@@ -79,9 +100,6 @@ namespace BookShuffler.ViewModels
             this.SetCanvasScale = ReactiveCommand.Create<string>(d => this.SetCanvasScaleValue(double.Parse(d)));
             this.SetTreeScale = ReactiveCommand.Create<string>(d => this.SetTreeScaleValue(double.Parse(d)));
 
-            this.AutoTileActiveSectionCommand = ReactiveCommand.Create(() =>
-                this.ActiveSection?.AutoTile(this.GetCanvasBounds?.Invoke().Width ?? 1200));
-
             this.EditCategoryCommand = ReactiveCommand.CreateFromTask(async () =>
             {
                 await EditCategories.Handle(this.Project.Categories);
@@ -90,6 +108,7 @@ namespace BookShuffler.ViewModels
             // Interactions
             // ====================================================================================
             this.EditCategories = new Interaction<ProjectCategories, Unit>();
+            this.NewProject = new Interaction<Unit, string>();
 
             // Settings
             // ====================================================================================
@@ -105,11 +124,16 @@ namespace BookShuffler.ViewModels
             if (!string.IsNullOrEmpty(this.Settings?.LastOpenedProject)
                 && File.Exists(this.Settings.LastOpenedProject))
             {
-                this.OpenProject(this.Settings.LastOpenedProject);
+                this.Open(this.Settings.LastOpenedProject);
             }
         }
-        
+
+        public MainWindowCommands Commands { get; }
+
         public Interaction<ProjectCategories, Unit> EditCategories { get; }
+        public Interaction<Unit, string> NewProject { get; }
+        public Interaction<Unit, string> OpenProject { get; }
+        public Interaction<Unit, string[]> ImportMarkdown { get; }
 
         public AppSettings Settings { get; private set; }
 
@@ -125,10 +149,13 @@ namespace BookShuffler.ViewModels
                 _unsavedSubscription?.Dispose();
 
                 _project = value;
-                _unsavedSubscription = _project.WhenAnyValue(x => x.HasUnsavedChanges)
-                    .Subscribe(_ => this.RaisePropertyChanged(nameof(AppTitle)));
+                _activeProjectSubject.OnNext(_project is not null);
                 this.RaisePropertyChanged();
                 this.RaisePropertyChanged(nameof(AppTitle));
+
+                if (_project is null) return;
+                _unsavedSubscription = _project.WhenAnyValue(x => x.HasUnsavedChanges)
+                    .Subscribe(_ => this.RaisePropertyChanged(nameof(AppTitle)));
             }
         }
 
@@ -146,7 +173,7 @@ namespace BookShuffler.ViewModels
         public ICommand AttachSelectedCommand { get; }
         public ICommand CreateCardCommand { get; }
         public ICommand CreateSectionCommand { get; }
-        
+
 
         public ICommand AutoTileActiveSectionCommand { get; }
 
@@ -239,9 +266,19 @@ namespace BookShuffler.ViewModels
         }
 
         /// <summary>
+        /// Create a new project at a given location in the storage provider
+        /// </summary>
+        /// <param name="projectFolder"></param>
+        public void New(string projectFolder)
+        {
+            this.Project = ProjectViewModel.New(projectFolder);
+            this.SelectedEntity = this.Project.Root;
+        }
+
+        /// <summary>
         /// Opens a project from the storage provider
         /// </summary>
-        public void OpenProject(string projectFolder)
+        public void Open(string projectFolder)
         {
             if (string.IsNullOrEmpty(projectFolder))
                 throw new ArgumentException("An empty project file/folder was provided");
@@ -266,7 +303,7 @@ namespace BookShuffler.ViewModels
         public void ImportTaggedMarkdown(string[] files)
         {
             if (this.Project is null) return;
-            
+
             foreach (var file in files)
             {
                 var parseResult = MarkdownParser.Parse(file);

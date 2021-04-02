@@ -21,6 +21,7 @@ namespace BookShuffler.Tools.Storage
 
         public string[] List(string path)
         {
+            if (!Directory.Exists(path)) return Array.Empty<string>();
             return Directory.EnumerateFiles(path).ToArray();
         }
 
