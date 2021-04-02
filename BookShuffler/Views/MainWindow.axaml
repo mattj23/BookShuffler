@@ -61,10 +61,19 @@
                 <MenuItem Header="Import Tagged Markdown" 
                           Command="{Binding Commands.ImportMarkdown}"/>
             </MenuItem>
-
-            <MenuItem Header="View">
+            
+            <MenuItem Header="Section">
                 <MenuItem Header="Auto Tile"
                           Command="{Binding Commands.AutoArrange}" />
+                
+                <MenuItem Header="Create Section"
+                          Command="{Binding Commands.CreateSection}" />
+                
+                <MenuItem Header="Create Index Card"
+                          Command="{Binding Commands.CreateCard}" />
+            </MenuItem>
+
+            <MenuItem Header="View">
                 
                 <MenuItem Header="Canvas Scale">
                     <MenuItem Header="40%" Command="{Binding Command.SetCanvasScale}" CommandParameter="0.4" />

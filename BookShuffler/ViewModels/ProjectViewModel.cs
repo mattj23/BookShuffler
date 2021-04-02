@@ -105,6 +105,7 @@ namespace BookShuffler.ViewModels
 
             parent.Entities.Add(child);
             this.RegisterEntity(child);
+            this.HasUnsavedChanges = true;
 
             return child;
         }
@@ -116,6 +117,7 @@ namespace BookShuffler.ViewModels
 
             parent.Entities.Add(child);
             this.RegisterEntity(child);
+            this.HasUnsavedChanges = true;
 
             return child;
         }

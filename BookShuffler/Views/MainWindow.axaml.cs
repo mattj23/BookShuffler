@@ -226,11 +226,14 @@ namespace BookShuffler.Views
             this.Register(this.ViewModel.Commands.AutoArrange, shortcut.AutoArrange);
             this.Register(this.ViewModel.Commands.AttachEntity, shortcut.AttachSelected);
             this.Register(this.ViewModel.Commands.DetachEntity, shortcut.DetachSelected);
+            this.Register(this.ViewModel.Commands.CreateCard, shortcut.CreateCard);
+            this.Register(this.ViewModel.Commands.CreateSection, shortcut.CreateSection);
         }
 
         private void Register(ICommand c, string s)
         {
-            this.KeyBindings.Add(new KeyBinding {Command = c, Gesture = KeyGesture.Parse(s)});
+            if (!string.IsNullOrEmpty(s))
+                this.KeyBindings.Add(new KeyBinding {Command = c, Gesture = KeyGesture.Parse(s)});
         }
     }
 }

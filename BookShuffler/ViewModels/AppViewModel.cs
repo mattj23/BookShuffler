@@ -28,8 +28,6 @@ namespace BookShuffler.ViewModels
         private IEntityViewModel? _selectedEntity;
         private IEntityViewModel? _selectedDetachedEntity;
 
-        private readonly BehaviorSubject<bool> _selectedIsSectionSubject;
-        private readonly BehaviorSubject<bool> _activeProjectSubject;
         private double _canvasScale;
         private double _treeScale;
         private ProjectViewModel? _project;
@@ -45,12 +43,15 @@ namespace BookShuffler.ViewModels
         {
             _storage = storage;
 
-            _selectedIsSectionSubject = new BehaviorSubject<bool>(false);
-            _activeProjectSubject = new BehaviorSubject<bool>(false);
             _projectSubscriptions = new List<IDisposable>();
 
             // Commands 
             // ====================================================================================
+            var hasActiveProject = this.WhenAnyValue(v => v.Project).Select(p => p is not null);
+            var hasActiveSection = this.WhenAnyValue(v => v.ActiveSection).Select(s => s is not null);
+            var hasSelection = this.WhenAnyValue(v => v.SelectedEntity).Select(e => e is not null);
+            var hasDetachedSelection = this.WhenAnyValue(v => v.SelectedDetachedEntity).Select(e => e is not null);
+            
             this.Commands = new MainWindowCommands
             {
                 NewProject = ReactiveCommand.Create(async () =>
@@ -65,23 +66,23 @@ namespace BookShuffler.ViewModels
                     if (!string.IsNullOrEmpty(result)) this.Open(result);
                 }),
 
-                SaveProject = ReactiveCommand.Create(this.SaveProject, _activeProjectSubject),
+                SaveProject = ReactiveCommand.Create(this.SaveProject, hasActiveProject),
 
                 ImportMarkdown = ReactiveCommand.Create(async () =>
                 {
                     var result = await ImportMarkdown.Handle(default);
                     this.ImportTaggedMarkdown(result);
-                }),
+                }, hasActiveProject),
 
                 AutoArrange = ReactiveCommand.Create(
                     () => this.ActiveSection?.AutoTile(this.GetCanvasBounds?.Invoke().Width ?? 1200),
-                    _selectedIsSectionSubject),
+                    hasActiveProject),
 
                 DetachEntity = ReactiveCommand.Create(() =>
                 {
                     this.Project?.DetachEntity(this.SelectedEntity);
                     this.SelectedEntity = null;
-                }),
+                }, hasSelection),
 
                 AttachEntity = ReactiveCommand.Create(() =>
                 {
@@ -91,15 +92,15 @@ namespace BookShuffler.ViewModels
                         this.SelectedEntity = attached;
                         this.SelectedDetachedEntity = null;
                     }
-                }),
+                }, hasDetachedSelection),
 
                 EditCategories = ReactiveCommand.CreateFromTask(async () =>
                 {
                     await EditCategories.Handle(this.Project.Categories);
                 }),
 
-                CreateCard = ReactiveCommand.Create(this.AddCardToSelected, _selectedIsSectionSubject),
-                CreateSection = ReactiveCommand.Create(this.AddSectionToSelected, _selectedIsSectionSubject),
+                CreateCard = ReactiveCommand.Create(this.AddCardToSelected, hasActiveSection),
+                CreateSection = ReactiveCommand.Create(this.AddSectionToSelected, hasActiveSection),
                 SetCanvasScale = ReactiveCommand.Create<string>(d => this.SetCanvasScaleValue(double.Parse(d))),
                 SetTreeScale = ReactiveCommand.Create<string>(d => this.SetTreeScaleValue(double.Parse(d)))
             };
@@ -160,7 +161,6 @@ namespace BookShuffler.ViewModels
                 _projectSubscriptions.Clear();
 
                 _project = value;
-                _activeProjectSubject.OnNext(_project is not null);
                 this.RaisePropertyChanged();
                 this.RaisePropertyChanged(nameof(AppTitle));
 
@@ -224,7 +224,6 @@ namespace BookShuffler.ViewModels
             set
             {
                 this.RaiseAndSetIfChanged(ref _selectedEntity, value);
-                _selectedIsSectionSubject.OnNext(_selectedEntity is SectionViewModel);
                 if (_selectedEntity is null) return;
 
                 if (_selectedEntity is SectionViewModel view)
@@ -350,7 +349,7 @@ namespace BookShuffler.ViewModels
                 Content = string.Empty
             };
 
-            this.ActiveSection?.Entities.Add(new IndexCardViewModel(card));
+            this.Project?.AddNewCard(this.ActiveSection, new IndexCardViewModel(card));
         }
 
         private void AddSectionToSelected()
@@ -363,7 +362,7 @@ namespace BookShuffler.ViewModels
                 Summary = "Summary Description"
             };
 
-            this.ActiveSection?.Entities.Add(new SectionViewModel(entity));
+            this.Project?.AddNewSection(this.ActiveSection, new SectionViewModel(entity));
         }
 
         // private string SelectedEntityFile()
