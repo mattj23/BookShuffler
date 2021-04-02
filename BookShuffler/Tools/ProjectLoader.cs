@@ -14,18 +14,14 @@ namespace BookShuffler.Tools
         public const string SectionFolderName = "sections";
         public const string CardFolderName = "cards";
 
-        private readonly Dictionary<Guid, IndexCard> _cards;
         private readonly Dictionary<Guid, SerializableSection> _sectionReps;
         private readonly Dictionary<Guid, SectionViewModel> _builtSections;
-        private readonly Dictionary<Guid, IndexCardViewModel> _builtCards;
         private readonly IStorageProvider _storage;
 
         public ProjectLoader(IStorageProvider storage)
         {
             _storage = storage;
-            _cards = new Dictionary<Guid, IndexCard>();
             _sectionReps = new Dictionary<Guid, SerializableSection>();
-            _builtCards = new Dictionary<Guid, IndexCardViewModel>();
             _builtSections = new Dictionary<Guid, SectionViewModel>();
         }
         
@@ -41,49 +37,47 @@ namespace BookShuffler.Tools
 
             var reader = new EntityReader(_storage);
 
+            // Load all index cards from the index card directory and add them to the global dictionary of entity
+            // view models.
             foreach (var file in _storage.List(cardPath))
             {
                 var cardInfo = reader.LoadIndexCard(file);
                 if (cardInfo is not null)
-                    _cards[cardInfo.Id] = cardInfo;
+                    result.AllEntities[cardInfo.Id] = new IndexCardViewModel(cardInfo);
             }
             
+            // Load all sections from the section directory and add them to both the global dictionary of entity
+            // view models and the dictionary of section representations which will be used to add children later
             foreach (var file in _storage.List(sectionPath))
             {
                 var item = reader.LoadSection(file);
                 _sectionReps[item.Id] = item;
+                var vm = new SectionViewModel(item.ToEntity());
+                _builtSections[item.Id] = vm;
+                result.AllEntities[item.Id] = vm;
             }
             
-            // Build the attached items
-            result.Root = (SectionViewModel) LoadEntity(result.Info.RootId);
+            // Identify the root node
+            result.Root = _builtSections[result.Info.RootId];
             
-            // Build the unattached sections
-            var remaining = _sectionReps.Keys.Where(k => !_builtSections.ContainsKey(k)).ToArray();
-            while (remaining.Any())
+            // Attach all children to all sections. We remove child IDs from the working set so that when we get to the
+            // end all remaining IDs belong to top level unattached entities
+            var working = result.AllEntities.Keys.ToHashSet();
+            working.Remove(result.Info.RootId);
+            foreach (var rep in _sectionReps.Values)
             {
-                // Find the ones with no parents
-                var references = _sectionReps.Values
-                    .SelectMany(r => r.Children, (section, child) => child.Id)
-                    .ToHashSet();
-
-                var orphans = remaining.Where(k => !references.Contains(k)).ToArray();
-
-                foreach (var id in orphans)
+                foreach (var child in rep.Children)
                 {
-                    result.Unattached.Add(LoadEntity(id));
-                }
-                
-                remaining = _sectionReps.Keys.Where(k => !_builtSections.ContainsKey(k)).ToArray();
-            }
-            
-            // Build the unattached cards
-            foreach (var card in _cards.Values)
-            {
-                if (!_builtCards.ContainsKey(card.Id))
-                {
-                    var viewModel = new IndexCardViewModel(_cards[card.Id]);
-                    _builtCards[card.Id] = viewModel;
-                    result.Unattached.Add(viewModel);
+                    if (working.Contains(child.Id))
+                    {
+                        working.Remove(child.Id);
+                    }
+                    else
+                    {
+                        // Error?
+                    }
+                    
+                    _builtSections[rep.Id].Entities.Add(result.AllEntities[child.Id]);
                 }
             }
             
@@ -98,42 +92,15 @@ namespace BookShuffler.Tools
                         suspect.Position = new Point(child.X, child.Y);
                 }
             }
+            
+            // Set unattached
+            foreach (var id in working)
+            {
+                result.Unattached.Add(result.AllEntities[id]);
+            }
 
-            foreach (var entity in _builtSections.Values)
-            {
-                result.AllEntities[entity.Id] = entity;
-            }
-            foreach (var entity in _builtCards.Values)
-            {
-                result.AllEntities[entity.Id] = entity;
-            }
             return result;
         }
-
-        private IEntityViewModel LoadEntity(Guid id)
-        {
-            if (_cards.ContainsKey(id))
-            {
-                var viewModel = new IndexCardViewModel(_cards[id]);
-                _builtCards[id] = viewModel;
-                return viewModel;
-            }
-            
-            if (_sectionReps.ContainsKey(id))
-            {
-                var viewModel = new SectionViewModel(_sectionReps[id].ToEntity());
-                _builtSections[id] = viewModel;
-
-                foreach (var child in _sectionReps[id].Children)
-                {
-                    viewModel.Entities.Add(LoadEntity(child.Id));
-                }
-
-                return viewModel;
-            }
-
-            throw new KeyNotFoundException($"Id {id} was not found");
-        }
-        
+       
     }
 }

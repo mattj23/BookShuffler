@@ -79,12 +79,37 @@ namespace BookShuffler.Tests
         }
 
         [Fact]
-        public void DetachItems()
+        public void DetachItem_MovesEntityToUnattached()
         {
             Project.DetachEntity(S0);
 
             Assert.DoesNotContain(S0, Project.Root.Entities);
             Assert.Contains(S0, Project.DetachedEntities);
         }
+
+        [Fact]
+        public void DetachItem_CreatesUnsavedChanges()
+        {
+            Assert.True(false);
+        }
+        
+        [Fact]
+        public void AttachItem_ReSortsOrder()
+        {
+            Assert.True(false);
+        }
+        
+        [Fact]
+        public void AttachItem_CreatesUnsavedChanges()
+        {
+            Assert.True(false);
+        }
+        
+        [Fact]
+        public void AttachItem_RemovesFromUnattached_AddsToSection()
+        {
+            Assert.True(false);
+        }
+        
     }
 }
