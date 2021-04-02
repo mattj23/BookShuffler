@@ -39,6 +39,8 @@ namespace BookShuffler.Views
             // Register interactions to the various handlers
             this.WhenActivated(d => d(ViewModel.EditCategories.RegisterHandler(DoEditCategoriesAsync)));
             this.WhenActivated(d => d(ViewModel.NewProject.RegisterHandler(DoSelectNewFolder)));
+            this.WhenActivated(d => d(ViewModel.OpenProject.RegisterHandler(DoOpenProjectAsync)));
+            this.WhenActivated(d => d(ViewModel.ImportMarkdown.RegisterHandler(DoImportMarkdownAsync)));
         }
 
         private AppViewModel? ViewModel => this.DataContext as AppViewModel;
@@ -87,6 +89,26 @@ namespace BookShuffler.Views
             var result = await dialog.ShowAsync(this);
             interaction.SetOutput(result?.FirstOrDefault());
         }
+        
+        private async Task DoImportMarkdownAsync(InteractionContext<Unit, string[]?> interaction)
+        {
+            var dialog = new OpenFileDialog
+            {
+                AllowMultiple = true,
+                Directory = ViewModel.Project.ProjectFolder,
+                Title = "Select Markdown File(s)",
+                Filters = new List<FileDialogFilter>{new FileDialogFilter()
+                {
+                    Extensions = {"md", "MD"},
+                    Name = "Markdown File"
+                }}
+            };
+
+            var result = await dialog.ShowAsync(this);
+            interaction.SetOutput(result);
+        }
+
+
         private void LayoutContainer_OnPointerPressed(object? sender, PointerPressedEventArgs e)
         {
             var pointer = e.GetCurrentPoint(this);
@@ -157,28 +179,6 @@ namespace BookShuffler.Views
             }
         }
         
-        private async void ImportTaggedMarkdown_OnClick(object? sender, RoutedEventArgs e)
-        {
-            var dialog = new OpenFileDialog
-            {
-                AllowMultiple = true,
-                Directory = ViewModel.Project.ProjectFolder,
-                Title = "Select Markdown File(s)",
-                Filters = new List<FileDialogFilter>{new FileDialogFilter()
-                {
-                    Extensions = {"md", "MD"},
-                    Name = "Markdown File"
-                }}
-            };
-
-            var result = await dialog.ShowAsync(this);
-            if (result?.Any() == true)
-            {
-                this.ViewModel.ImportTaggedMarkdown(result);
-            }
-        }
-
-
         private void Section_OnDoubleTapped(object? sender, RoutedEventArgs e)
         {
             if ((sender as Control)?.Parent is TreeViewItem parent)

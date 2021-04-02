@@ -65,6 +65,12 @@ namespace BookShuffler.ViewModels
                 }),
                 
                 SaveProject = ReactiveCommand.Create(this.SaveProject, _activeProjectSubject),
+                
+                ImportMarkdown = ReactiveCommand.Create(async () =>
+                {
+                    var result = await ImportMarkdown.Handle(default);
+                    this.ImportTaggedMarkdown(result);
+                }),
 
                 AutoArrange = ReactiveCommand.Create(
                     () => this.ActiveSection?.AutoTile(this.GetCanvasBounds?.Invoke().Width ?? 1200),
@@ -108,7 +114,9 @@ namespace BookShuffler.ViewModels
             // Interactions
             // ====================================================================================
             this.EditCategories = new Interaction<ProjectCategories, Unit>();
-            this.NewProject = new Interaction<Unit, string>();
+            this.NewProject = new Interaction<Unit, string?>();
+            this.OpenProject = new Interaction<Unit, string?>();
+            this.ImportMarkdown = new Interaction<Unit, string[]?>();
 
             // Settings
             // ====================================================================================
@@ -130,10 +138,14 @@ namespace BookShuffler.ViewModels
 
         public MainWindowCommands Commands { get; }
 
+        // Interactions
+        // ========================================================================================
         public Interaction<ProjectCategories, Unit> EditCategories { get; }
-        public Interaction<Unit, string> NewProject { get; }
-        public Interaction<Unit, string> OpenProject { get; }
-        public Interaction<Unit, string[]> ImportMarkdown { get; }
+        public Interaction<Unit, string?> NewProject { get; }
+        public Interaction<Unit, string?> OpenProject { get; }
+        public Interaction<Unit, string[]?> ImportMarkdown { get; }
+        
+        
 
         public AppSettings Settings { get; private set; }
 
@@ -194,11 +206,6 @@ namespace BookShuffler.ViewModels
         /// a property in the XAML is currently broken in Avalonia.
         /// </summary>
         public Func<Rect> GetCanvasBounds { get; set; }
-
-        /// <summary>
-        /// Gets whether or not there is an actively loaded project based on the value of ProjectPath
-        /// </summary>
-        public bool HasActiveProject => this.Project is not null;
 
         /// <summary>
         /// Gets the title of the application window
@@ -300,9 +307,10 @@ namespace BookShuffler.ViewModels
         /// Import a tagged markdown file into the currently active project
         /// </summary>
         /// <param name="files"></param>
-        public void ImportTaggedMarkdown(string[] files)
+        public void ImportTaggedMarkdown(string[]? files)
         {
             if (this.Project is null) return;
+            if (files is null) return;
 
             foreach (var file in files)
             {
