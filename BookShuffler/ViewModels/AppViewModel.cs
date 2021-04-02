@@ -87,9 +87,16 @@ namespace BookShuffler.ViewModels
                 AttachEntity = ReactiveCommand.Create(() =>
                 {
                     var attached = this.Project?.AttachEntity(this.SelectedDetachedEntity, this.ActiveSection);
-                    if (attached is not null)
+                    if (attached is IndexCardViewModel card)
                     {
-                        this.SelectedEntity = attached;
+                        this.SelectedEntity = card;
+                        this.SelectedDetachedEntity = null;
+                    }
+
+                    if (attached is SectionViewModel sec)
+                    {
+                        var parent = this.Project.GetParent(sec);
+                        this.SelectedEntity = parent;
                         this.SelectedDetachedEntity = null;
                     }
                 }, hasDetachedSelection),
