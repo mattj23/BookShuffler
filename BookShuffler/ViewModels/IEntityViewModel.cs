@@ -1,4 +1,5 @@
 using System;
+using System.Windows.Input;
 using Avalonia;
 using BookShuffler.Models;
 
@@ -18,5 +19,9 @@ namespace BookShuffler.ViewModels
         string Content { get; }
 
         void SetViewOffset(Point offset);
+        
+        ICommand Detach { get; }
+        
+        IObservable<IEntityViewModel> DetachRequest { get; }
     }
 }

@@ -104,6 +104,7 @@
                 <StackPanel Orientation="Horizontal">
                     <ComboBox Items="{Binding ProjectCategories.All}"
                               x:Name="CategorySelector"
+                              Margin="0 0 5 0"
                               SelectedItem="{Binding Category}">
                         <ComboBox.ItemTemplate>
                             <DataTemplate>
@@ -111,6 +112,10 @@
                             </DataTemplate>
                         </ComboBox.ItemTemplate>
                     </ComboBox>
+                    
+                    <Button Command="{Binding Detach}">
+                        <avalonia:MaterialIcon Kind="Scissors" />
+                    </Button>
                 </StackPanel>
                      
             

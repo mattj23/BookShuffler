@@ -1,6 +1,9 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
+using System.Windows.Input;
 using Avalonia;
 using BookShuffler.Models;
 using ReactiveUI;
@@ -15,7 +18,7 @@ namespace BookShuffler.ViewModels
         private readonly Entity _model;
         private int _z;
         private bool _isExpanded;
-
+        private readonly Subject<IEntityViewModel> _detachSubject;
 
         public Point ViewPosition => _position + _viewOffset;
         
@@ -24,7 +27,13 @@ namespace BookShuffler.ViewModels
             _model = model;
             this.Entities = new ObservableCollection<IEntityViewModel>();
             _childrenOffset = new Point(0, 0);
+            _detachSubject = new Subject<IEntityViewModel>();
+            this.Detach = ReactiveCommand.Create(() => _detachSubject.OnNext(this));
         }
+        
+        public ICommand Detach { get; }
+
+        public IObservable<IEntityViewModel> DetachRequest => _detachSubject.AsObservable();
 
         public SectionViewModel(string summary)
         {

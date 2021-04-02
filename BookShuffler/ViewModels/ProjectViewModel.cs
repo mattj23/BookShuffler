@@ -180,6 +180,8 @@ namespace BookShuffler.ViewModels
             {
                 // If this is an index card we will attach the project's categories to it
                 cardViewModel.ProjectCategories = this.Categories;
+                _entitySubscriptions.Add(cardViewModel.WhenAnyValue(e => e.Category)
+                    .Subscribe(_ => this.HasUnsavedChanges = true));
             }
 
             _allEntities[viewModel.Id] = viewModel;
@@ -187,6 +189,7 @@ namespace BookShuffler.ViewModels
                 .Subscribe(_ => this.HasUnsavedChanges = true));
             _entitySubscriptions.Add(viewModel.WhenAnyValue(e => e.Position)
                 .Subscribe(_ => this.HasUnsavedChanges = true));
+            _entitySubscriptions.Add(viewModel.DetachRequest.Subscribe(e => this.DetachEntity(e)));
         }
 
         /// <summary>
