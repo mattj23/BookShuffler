@@ -143,7 +143,7 @@ namespace BookShuffler.ViewModels
             return other.Id == this.Id;
         }
 
-        public IndexCardViewModel[] GetDescendantsInOrder()
+        public IndexCardViewModel[] GetOrderedCards()
         {
             var cards = new List<IndexCardViewModel>();
             var sections = new List<SectionViewModel>();

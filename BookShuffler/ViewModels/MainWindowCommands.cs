@@ -21,8 +21,8 @@ namespace BookShuffler.ViewModels
 
         public ICommand SetCanvasScale { get; set; }
         public ICommand SetTreeScale { get; set; }
-
         
-        
+        public ICommand ExportRoot { get; set; }
+        public ICommand ExportSection { get; set; }
     }
 }

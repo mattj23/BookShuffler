@@ -10,6 +10,8 @@ namespace BookShuffler.Models
         public string? AttachSelected { get; set; } = "Ctrl+A";
         public string? CreateSection { get; set; } = null;
         public string? CreateCard { get; set; } = null;
+        public string? ExportAll { get; set; } = null;
+        public string? ExportSelected { get; set; } = null;
 
     }
 }

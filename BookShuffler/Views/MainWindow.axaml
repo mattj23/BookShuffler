@@ -60,6 +60,8 @@
                 <Separator />
                 <MenuItem Header="Import Tagged Markdown" 
                           Command="{Binding Commands.ImportMarkdown}"/>
+                <MenuItem Header="Export Entire Project" 
+                          Command="{Binding Commands.ExportRoot}"/>
             </MenuItem>
             
             <MenuItem Header="Section">
@@ -71,6 +73,9 @@
                 
                 <MenuItem Header="Create Index Card"
                           Command="{Binding Commands.CreateCard}" />
+                
+                <MenuItem Header="Export Active Section" 
+                          Command="{Binding Commands.ExportSection}"/>
             </MenuItem>
 
             <MenuItem Header="View">

@@ -13,6 +13,7 @@ using Avalonia.Markup.Xaml;
 using Avalonia.ReactiveUI;
 using BookShuffler.Models;
 using BookShuffler.ViewModels;
+using MessageBox.Avalonia;
 using MessageBox.Avalonia.Enums;
 using ReactiveUI;
 
@@ -41,9 +42,10 @@ namespace BookShuffler.Views
             this.WhenActivated(d => d(ViewModel.NewProject.RegisterHandler(DoSelectNewFolder)));
             this.WhenActivated(d => d(ViewModel.OpenProject.RegisterHandler(DoOpenProjectAsync)));
             this.WhenActivated(d => d(ViewModel.ImportMarkdown.RegisterHandler(DoImportMarkdownAsync)));
+            this.WhenActivated(d => d(ViewModel.ExportMarkdown.RegisterHandler(DoSelectExportFile)));
         }
 
-        private AppViewModel? ViewModel => this.DataContext as AppViewModel;
+        private AppViewModel? ViewModel => DataContext as AppViewModel;
 
         private void InitializeComponent()
         {
@@ -62,6 +64,25 @@ namespace BookShuffler.Views
             interaction.SetOutput(default);
         }
 
+        private async Task DoSelectExportFile(InteractionContext<Unit, string?> interaction)
+        {
+            var dialog = new SaveFileDialog
+            {
+                Title = "Select Location for New Project",
+                DefaultExtension = "md",
+                Directory = this.ViewModel.Project.ProjectFolder,
+                InitialFileName = "export.md",
+                Filters = new List<FileDialogFilter>{new FileDialogFilter
+                {
+                    Extensions = {"md", "MD"},
+                    Name = "Markdown File"
+                }}
+            };
+
+            var result = await dialog.ShowAsync(this);
+            interaction.SetOutput(result);
+        }
+        
         private async Task DoSelectNewFolder(InteractionContext<Unit, string?> interaction)
         {
             var dialog = new OpenFolderDialog
@@ -97,7 +118,7 @@ namespace BookShuffler.Views
                 AllowMultiple = true,
                 Directory = ViewModel.Project.ProjectFolder,
                 Title = "Select Markdown File(s)",
-                Filters = new List<FileDialogFilter>{new FileDialogFilter()
+                Filters = new List<FileDialogFilter>{new FileDialogFilter
                 {
                     Extensions = {"md", "MD"},
                     Name = "Markdown File"
@@ -121,12 +142,12 @@ namespace BookShuffler.Views
         
         private void LayoutContainer_OnPointerMoved(object? sender, PointerEventArgs e)
         {
-            if (_isPanning & this.ViewModel != null)
+            if (_isPanning & ViewModel != null)
             {
                 var pointer = e.GetCurrentPoint(this);
                 var shift = pointer.Position - _dragStart;
                 _dragStart = pointer.Position;
-                this.ViewModel?.ActiveSection?.IncrementChildrenOffset(shift);
+                ViewModel?.ActiveSection?.IncrementChildrenOffset(shift);
             }
         }
 
@@ -145,11 +166,11 @@ namespace BookShuffler.Views
                 _clickPoint = pointer.Position;
                 _dragStart = viewModel.Position;
                 
-                this.ViewModel?.ActiveSection?.BringChildToFront(_selected);
+                ViewModel?.ActiveSection?.BringChildToFront(_selected);
 
                 if (viewModel is IndexCardViewModel card)
                 {
-                    this.ViewModel.SelectedEntity = card;
+                    ViewModel.SelectedEntity = card;
                 }
             }
 
@@ -175,7 +196,7 @@ namespace BookShuffler.Views
             if (_selected is not null)
             {
                 _selected = null;
-                this.ViewModel.ResortActiveSection();
+                ViewModel.ResortActiveSection();
             }
         }
         
@@ -189,14 +210,14 @@ namespace BookShuffler.Views
 
         private async void Window_OnClosing(object? sender, CancelEventArgs e)
         {
-            if (_forceClose || this.ViewModel?.Project?.HasUnsavedChanges != true) return;
+            if (_forceClose || ViewModel?.Project?.HasUnsavedChanges != true) return;
             
             // This is arranged in this way because Avalonia does not wait for this to complete as an asynchronous
             // method and will not accept async Task as a method signature. Thus when reaching the await the window
             // will close anyway unless we interrupt it.
             e.Cancel = true;
                 
-            var dialog = MessageBox.Avalonia.MessageBoxManager
+            var dialog = MessageBoxManager
                 .GetMessageBoxStandardWindow("Unsaved Changes",
                     "You have unsaved changes, are you sure you want to exit?", ButtonEnum.OkCancel);
             var result = await dialog.ShowDialog(this);
@@ -204,36 +225,38 @@ namespace BookShuffler.Views
             if (result == ButtonResult.Ok)
             {
                 _forceClose = true;
-                this.Close();
+                Close();
             }
         }
 
         private void MainWindow_OnDataContextChanged(object? sender, EventArgs e)
         {
-            if (this.ViewModel is not null)
+            if (ViewModel is not null)
             {
-                this.RegisterKeyBindings(this.ViewModel.Settings.KeyBindings);
-                this.ViewModel.GetCanvasBounds = () => _layoutContainer.Bounds;
+                RegisterKeyBindings(ViewModel.Settings.KeyBindings);
+                ViewModel.GetCanvasBounds = () => _layoutContainer.Bounds;
             }
         }
 
         private void RegisterKeyBindings(KeyboardShortcuts shortcut)
         {
-            this.KeyBindings.Clear();
-            this.Register(this.ViewModel.LeftExpander.Toggle, shortcut.ExpandProject);
-            this.Register(this.ViewModel.RightExpander.Toggle, shortcut.ExpandDetached);
-            this.Register(this.ViewModel.Commands.SaveProject, shortcut.SaveProject);
-            this.Register(this.ViewModel.Commands.AutoArrange, shortcut.AutoArrange);
-            this.Register(this.ViewModel.Commands.AttachEntity, shortcut.AttachSelected);
-            this.Register(this.ViewModel.Commands.DetachEntity, shortcut.DetachSelected);
-            this.Register(this.ViewModel.Commands.CreateCard, shortcut.CreateCard);
-            this.Register(this.ViewModel.Commands.CreateSection, shortcut.CreateSection);
+            KeyBindings.Clear();
+            Register(ViewModel.LeftExpander.Toggle, shortcut.ExpandProject);
+            Register(ViewModel.RightExpander.Toggle, shortcut.ExpandDetached);
+            Register(ViewModel.Commands.SaveProject, shortcut.SaveProject);
+            Register(ViewModel.Commands.AutoArrange, shortcut.AutoArrange);
+            Register(ViewModel.Commands.AttachEntity, shortcut.AttachSelected);
+            Register(ViewModel.Commands.DetachEntity, shortcut.DetachSelected);
+            Register(ViewModel.Commands.CreateCard, shortcut.CreateCard);
+            Register(ViewModel.Commands.CreateSection, shortcut.CreateSection);
+            Register(ViewModel.Commands.ExportRoot, shortcut.ExportAll);
+            Register(ViewModel.Commands.ExportSection, shortcut.ExportSelected);
         }
 
         private void Register(ICommand c, string s)
         {
             if (!string.IsNullOrEmpty(s))
-                this.KeyBindings.Add(new KeyBinding {Command = c, Gesture = KeyGesture.Parse(s)});
+                KeyBindings.Add(new KeyBinding {Command = c, Gesture = KeyGesture.Parse(s)});
         }
     }
 }

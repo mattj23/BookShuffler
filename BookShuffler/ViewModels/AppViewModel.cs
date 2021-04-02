@@ -105,6 +105,18 @@ namespace BookShuffler.ViewModels
                 {
                     await EditCategories.Handle(this.Project.Categories);
                 }),
+                
+                ExportSection = ReactiveCommand.Create(async () =>
+                {
+                    var result = await this.ExportMarkdown.Handle(default);
+                    this.ExportTo(result, this.ActiveSection);
+                }, hasActiveSection),
+
+                ExportRoot = ReactiveCommand.Create(async () =>
+                {
+                    var result = await this.ExportMarkdown.Handle(default);
+                    this.ExportTo(result, this.Project?.Root);
+                }, hasActiveProject),
 
                 CreateCard = ReactiveCommand.Create(this.AddCardToSelected, hasActiveSection),
                 CreateSection = ReactiveCommand.Create(this.AddSectionToSelected, hasActiveSection),
@@ -113,15 +125,13 @@ namespace BookShuffler.ViewModels
             };
 
 
-
-
-
             // Interactions
             // ====================================================================================
             this.EditCategories = new Interaction<ProjectCategories, Unit>();
             this.NewProject = new Interaction<Unit, string?>();
             this.OpenProject = new Interaction<Unit, string?>();
             this.ImportMarkdown = new Interaction<Unit, string[]?>();
+            this.ExportMarkdown = new Interaction<Unit, string?>();
 
             // Settings
             // ====================================================================================
@@ -149,7 +159,7 @@ namespace BookShuffler.ViewModels
         public Interaction<Unit, string?> NewProject { get; }
         public Interaction<Unit, string?> OpenProject { get; }
         public Interaction<Unit, string[]?> ImportMarkdown { get; }
-        
+        public Interaction<Unit, string?> ExportMarkdown { get; }
         
 
         public AppSettings Settings { get; private set; }
@@ -370,6 +380,16 @@ namespace BookShuffler.ViewModels
             };
 
             this.Project?.AddNewSection(this.ActiveSection, new SectionViewModel(entity));
+        }
+
+        private void ExportTo(string? path, SectionViewModel section)
+        {
+            if (string.IsNullOrEmpty(path)) return;
+            if (section is null) return;
+
+            var cards = section.GetOrderedCards();
+            var text = string.Join("\n\n", cards.Select(x => x.Content));
+            _storage.Put(path, text);
         }
 
         // private string SelectedEntityFile()
