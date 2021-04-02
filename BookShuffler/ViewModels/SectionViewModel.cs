@@ -126,5 +126,11 @@ namespace BookShuffler.ViewModels
             this._viewOffset = offset;
             this.RaisePropertyChanged(nameof(ViewPosition));
         }
+
+        public bool Equals(IEntityViewModel? other)
+        {
+            if (other is null) return false;
+            return other.Id == this.Id;
+        }
     }
 }

@@ -224,8 +224,8 @@ namespace BookShuffler.Views
             this.Register(this.ViewModel.RightExpander.Toggle, shortcut.ExpandDetached);
             this.Register(this.ViewModel.Commands.SaveProject, shortcut.SaveProject);
             this.Register(this.ViewModel.Commands.AutoArrange, shortcut.AutoArrange);
-            this.Register(this.ViewModel.AttachSelectedCommand, shortcut.AttachSelected);
-            this.Register(this.ViewModel.DetachSelectedCommand, shortcut.DetachSelected);
+            this.Register(this.ViewModel.Commands.AttachEntity, shortcut.AttachSelected);
+            this.Register(this.ViewModel.Commands.DetachEntity, shortcut.DetachSelected);
         }
 
         private void Register(ICommand c, string s)

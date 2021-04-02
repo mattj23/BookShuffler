@@ -67,20 +67,20 @@
                           Command="{Binding Commands.AutoArrange}" />
                 
                 <MenuItem Header="Canvas Scale">
-                    <MenuItem Header="40%" Command="{Binding SetCanvasScale}" CommandParameter="0.4" />
-                    <MenuItem Header="60%" Command="{Binding SetCanvasScale}" CommandParameter="0.6" />
-                    <MenuItem Header="80%" Command="{Binding SetCanvasScale}" CommandParameter="0.8" />
-                    <MenuItem Header="100%" Command="{Binding SetCanvasScale}" CommandParameter="1.0" />
-                    <MenuItem Header="120%" Command="{Binding SetCanvasScale}" CommandParameter="1.2" />
-                    <MenuItem Header="140%" Command="{Binding SetCanvasScale}" CommandParameter="1.4" />
-                    <MenuItem Header="160%" Command="{Binding SetCanvasScale}" CommandParameter="1.6" />
+                    <MenuItem Header="40%" Command="{Binding Command.SetCanvasScale}" CommandParameter="0.4" />
+                    <MenuItem Header="60%" Command="{Binding Command.SetCanvasScale}" CommandParameter="0.6" />
+                    <MenuItem Header="80%" Command="{Binding Command.SetCanvasScale}" CommandParameter="0.8" />
+                    <MenuItem Header="100%" Command="{Binding Command.SetCanvasScale}" CommandParameter="1.0" />
+                    <MenuItem Header="120%" Command="{Binding Command.SetCanvasScale}" CommandParameter="1.2" />
+                    <MenuItem Header="140%" Command="{Binding Command.SetCanvasScale}" CommandParameter="1.4" />
+                    <MenuItem Header="160%" Command="{Binding Command.SetCanvasScale}" CommandParameter="1.6" />
                 </MenuItem>
                 
                 <MenuItem Header="Project Tree Scale">
-                    <MenuItem Header="40%" Command="{Binding SetTreeScale}" CommandParameter="0.4" />
-                    <MenuItem Header="60%" Command="{Binding SetTreeScale}" CommandParameter="0.6" />
-                    <MenuItem Header="80%" Command="{Binding SetTreeScale}" CommandParameter="0.8" />
-                    <MenuItem Header="100%" Command="{Binding SetTreeScale}" CommandParameter="1.0" />
+                    <MenuItem Header="40%" Command="{Binding Command.SetTreeScale}" CommandParameter="0.4" />
+                    <MenuItem Header="60%" Command="{Binding Command.SetTreeScale}" CommandParameter="0.6" />
+                    <MenuItem Header="80%" Command="{Binding Command.SetTreeScale}" CommandParameter="0.8" />
+                    <MenuItem Header="100%" Command="{Binding Command.SetTreeScale}" CommandParameter="1.0" />
                 </MenuItem>
             </MenuItem>
         </Menu>

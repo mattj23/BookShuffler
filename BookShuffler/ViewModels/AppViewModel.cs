@@ -63,9 +63,9 @@ namespace BookShuffler.ViewModels
                     var result = await OpenProject.Handle(default);
                     if (!string.IsNullOrEmpty(result)) this.Open(result);
                 }),
-                
+
                 SaveProject = ReactiveCommand.Create(this.SaveProject, _activeProjectSubject),
-                
+
                 ImportMarkdown = ReactiveCommand.Create(async () =>
                 {
                     var result = await ImportMarkdown.Handle(default);
@@ -75,41 +75,38 @@ namespace BookShuffler.ViewModels
                 AutoArrange = ReactiveCommand.Create(
                     () => this.ActiveSection?.AutoTile(this.GetCanvasBounds?.Invoke().Width ?? 1200),
                     _selectedIsSectionSubject),
+
+                DetachEntity = ReactiveCommand.Create(() =>
+                {
+                    var detached = this.Project?.DetachEntity(this.SelectedEntity);
+                    if (detached is not null) this.SelectedDetachedEntity = detached;
+                    this.SelectedEntity = null;
+                }),
+
+                AttachEntity = ReactiveCommand.Create(() =>
+                {
+                    var attached = this.Project?.AttachEntity(this.SelectedDetachedEntity, this.ActiveSection);
+                    if (attached is not null)
+                    {
+                        this.SelectedEntity = attached;
+                        this.SelectedDetachedEntity = null;
+                    }
+                }),
+
+                EditCategories = ReactiveCommand.CreateFromTask(async () =>
+                {
+                    await EditCategories.Handle(this.Project.Categories);
+                }),
+
+                CreateCard = ReactiveCommand.Create(this.AddCardToSelected, _selectedIsSectionSubject),
+                CreateSection = ReactiveCommand.Create(this.AddSectionToSelected, _selectedIsSectionSubject),
+                SetCanvasScale = ReactiveCommand.Create<string>(d => this.SetCanvasScaleValue(double.Parse(d))),
+                SetTreeScale = ReactiveCommand.Create<string>(d => this.SetTreeScaleValue(double.Parse(d)))
             };
 
-            this.DetachSelectedCommand = ReactiveCommand.Create(() =>
-            {
-                var detached = this.Project?.DetachEntity(this.SelectedEntity);
-                if (detached is not null) this.SelectedDetachedEntity = detached;
-                this.SelectedEntity = null;
-            });
 
-            this.AttachSelectedCommand = ReactiveCommand.Create(() =>
-            {
-                var attached = this.Project?.AttachEntity(this.SelectedDetachedEntity, this.ActiveSection);
-                if (attached is not null)
-                {
-                    this.SelectedEntity = attached;
-                    this.SelectedDetachedEntity = null;
-                }
-            });
 
-            // this.LaunchEditorCommand = ReactiveCommand.Create(this.LaunchEditorOnSelected);
-            // this.LoadFromFileCommand = ReactiveCommand.Create(this.LoadSelectedFromFile);
-            this.DeleteEntityCommand = ReactiveCommand.Create(this.DeleteSelected);
 
-            this.CreateCardCommand =
-                ReactiveCommand.Create(this.AddCardToSelected, _selectedIsSectionSubject);
-            this.CreateSectionCommand =
-                ReactiveCommand.Create(this.AddSectionToSelected, _selectedIsSectionSubject);
-
-            this.SetCanvasScale = ReactiveCommand.Create<string>(d => this.SetCanvasScaleValue(double.Parse(d)));
-            this.SetTreeScale = ReactiveCommand.Create<string>(d => this.SetTreeScaleValue(double.Parse(d)));
-
-            this.EditCategoryCommand = ReactiveCommand.CreateFromTask(async () =>
-            {
-                await EditCategories.Handle(this.Project.Categories);
-            });
 
             // Interactions
             // ====================================================================================
@@ -170,24 +167,9 @@ namespace BookShuffler.ViewModels
                     .Subscribe(_ => this.RaisePropertyChanged(nameof(AppTitle)));
             }
         }
-
-        public ICommand EditCategoryCommand { get; }
-        public ICommand SetCanvasScale { get; }
-        public ICommand SetTreeScale { get; }
-
-        public ICommand SaveProjectCommand { get; }
-
-        public ICommand DetachSelectedCommand { get; }
-
-        public ICommand DeleteEntityCommand { get; }
         public ICommand LaunchEditorCommand { get; }
         public ICommand LoadFromFileCommand { get; }
-        public ICommand AttachSelectedCommand { get; }
-        public ICommand CreateCardCommand { get; }
-        public ICommand CreateSectionCommand { get; }
 
-
-        public ICommand AutoTileActiveSectionCommand { get; }
 
         public double CanvasScale
         {
