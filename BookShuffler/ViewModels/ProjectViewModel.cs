@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Xml.XPath;
 using BookShuffler.Models;
 using BookShuffler.Tools;
@@ -22,6 +24,7 @@ namespace BookShuffler.ViewModels
         private readonly Dictionary<Guid, IEntityViewModel> _allEntities;
         private readonly List<IDisposable> _entitySubscriptions;
         private bool _hasUnsavedChanges;
+        private readonly Subject<IEntityViewModel> _detachedSubject;
 
         private ProjectViewModel(string projectFolder, SectionViewModel root, IEnumerable<CategoryViewModel> categories)
         {
@@ -34,7 +37,10 @@ namespace BookShuffler.ViewModels
 
             _allEntities = new Dictionary<Guid, IEntityViewModel>{{_root.Id, root}};
             _entitySubscriptions = new List<IDisposable>();
+            _detachedSubject = new Subject<IEntityViewModel>();
         }
+
+        public IObservable<IEntityViewModel> EntityDetached => _detachedSubject.AsObservable();
 
         public string ProjectFolder { get; }
 
@@ -142,6 +148,8 @@ namespace BookShuffler.ViewModels
 
             parent.Entities.Remove(entity);
             this.DetachedEntities.Add(entity);
+            _detachedSubject.OnNext(entity);
+            this.HasUnsavedChanges = true;
             return entity;
         }
 
@@ -155,6 +163,7 @@ namespace BookShuffler.ViewModels
             if (located is null) return null;
             
             newParent.Entities.Add(entity);
+            this.HasUnsavedChanges = true;
             return entity;
         }
 

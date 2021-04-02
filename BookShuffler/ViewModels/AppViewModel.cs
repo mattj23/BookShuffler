@@ -33,7 +33,7 @@ namespace BookShuffler.ViewModels
         private double _canvasScale;
         private double _treeScale;
         private ProjectViewModel? _project;
-        private IDisposable? _unsavedSubscription;
+        private List<IDisposable> _projectSubscriptions;
 
         private readonly IStorageProvider _storage;
 
@@ -47,6 +47,7 @@ namespace BookShuffler.ViewModels
 
             _selectedIsSectionSubject = new BehaviorSubject<bool>(false);
             _activeProjectSubject = new BehaviorSubject<bool>(false);
+            _projectSubscriptions = new List<IDisposable>();
 
             // Commands 
             // ====================================================================================
@@ -78,8 +79,7 @@ namespace BookShuffler.ViewModels
 
                 DetachEntity = ReactiveCommand.Create(() =>
                 {
-                    var detached = this.Project?.DetachEntity(this.SelectedEntity);
-                    if (detached is not null) this.SelectedDetachedEntity = detached;
+                    this.Project?.DetachEntity(this.SelectedEntity);
                     this.SelectedEntity = null;
                 }),
 
@@ -155,7 +155,9 @@ namespace BookShuffler.ViewModels
             private set
             {
                 if (_project == value) return;
-                _unsavedSubscription?.Dispose();
+                foreach (var d in _projectSubscriptions)
+                    d.Dispose();
+                _projectSubscriptions.Clear();
 
                 _project = value;
                 _activeProjectSubject.OnNext(_project is not null);
@@ -163,8 +165,9 @@ namespace BookShuffler.ViewModels
                 this.RaisePropertyChanged(nameof(AppTitle));
 
                 if (_project is null) return;
-                _unsavedSubscription = _project.WhenAnyValue(x => x.HasUnsavedChanges)
-                    .Subscribe(_ => this.RaisePropertyChanged(nameof(AppTitle)));
+                _projectSubscriptions.Add(_project.WhenAnyValue(x => x.HasUnsavedChanges)
+                    .Subscribe(_ => this.RaisePropertyChanged(nameof(AppTitle))));
+                _projectSubscriptions.Add(_project.EntityDetached.Subscribe(e => this.SelectedDetachedEntity = e));
             }
         }
         public ICommand LaunchEditorCommand { get; }
