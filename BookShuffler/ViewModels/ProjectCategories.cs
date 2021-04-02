@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace BookShuffler.ViewModels
 {
@@ -17,6 +18,8 @@ namespace BookShuffler.ViewModels
         private readonly ObservableCollection<CategoryViewModel> _categories;
         private readonly Dictionary<int, CategoryViewModel> _byId;
 
+        public ProjectCategories() : this(Enumerable.Empty<CategoryViewModel>()) {}
+        
         public ProjectCategories(IEnumerable<CategoryViewModel> categories)
         {
             _categories = new ObservableCollection<CategoryViewModel>();

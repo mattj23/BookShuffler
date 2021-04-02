@@ -2,12 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Reactive;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
+using Avalonia.ReactiveUI;
 using BookShuffler.Models;
 using BookShuffler.ViewModels;
 using MessageBox.Avalonia.Enums;
@@ -15,7 +18,7 @@ using ReactiveUI;
 
 namespace BookShuffler.Views
 {
-    public class MainWindow : Window
+    public class MainWindow : ReactiveWindow<AppViewModel>
     {
         private IEntityViewModel? _selected;
         private Point _clickPoint;
@@ -33,6 +36,8 @@ namespace BookShuffler.Views
             this.AttachDevTools();
 #endif
 
+            this.WhenActivated(d => d(ViewModel.EditCategories.RegisterHandler(DoEditCategoriesAsync)));
+
         }
 
         private AppViewModel? ViewModel => this.DataContext as AppViewModel;
@@ -41,6 +46,14 @@ namespace BookShuffler.Views
         {
             AvaloniaXamlLoader.Load(this);
             _layoutContainer = this.FindControl<ItemsControl>("LayoutContainer");
+        }
+
+        private async Task DoEditCategoriesAsync(InteractionContext<ProjectCategories, Unit> interaction)
+        {
+            var dialog = new CategoryEditorView();
+            dialog.DataContext = interaction.Input;
+            await dialog.ShowDialog(this);
+            interaction.SetOutput(default);
         }
 
         private void LayoutContainer_OnPointerPressed(object? sender, PointerPressedEventArgs e)

@@ -55,6 +55,10 @@
                           Command="{Binding SaveProjectCommand}"
                           IsEnabled="{Binding HasActiveProject}" />
                 <Separator />
+                <MenuItem Header="Edit Project Categories"
+                          Command="{Binding EditCategoryCommand}"
+                          IsEnabled="{Binding HasActiveProject}" />
+                <Separator />
                 <MenuItem Header="Import Tagged Markdown"
                           IsEnabled="{Binding HasActiveProject}"
                           Click="ImportTaggedMarkdown_OnClick" />

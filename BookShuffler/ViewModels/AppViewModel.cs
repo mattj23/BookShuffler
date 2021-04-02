@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reactive;
+using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -45,6 +46,8 @@ namespace BookShuffler.ViewModels
 
             _selectedIsSectionSubject = new BehaviorSubject<bool>(false);
 
+            // Commands 
+            // ====================================================================================
             this.SaveProjectCommand = ReactiveCommand.Create(this.SaveProject);
             
             this.DetachSelectedCommand = ReactiveCommand.Create(() =>
@@ -79,7 +82,17 @@ namespace BookShuffler.ViewModels
             this.AutoTileActiveSectionCommand = ReactiveCommand.Create(() =>
                 this.ActiveSection?.AutoTile(this.GetCanvasBounds?.Invoke().Width ?? 1200));
 
+            this.EditCategoryCommand = ReactiveCommand.CreateFromTask(async () =>
+            {
+                await EditCategories.Handle(this.Project.Categories);
+            });
 
+            // Interactions
+            // ====================================================================================
+            this.EditCategories = new Interaction<ProjectCategories, Unit>();
+
+            // Settings
+            // ====================================================================================
             this.LeftExpander = new ToggleExpanderViewModel {IsExpanded = true};
             this.RightExpander = new ToggleExpanderViewModel {IsExpanded = true};
             this.CanvasScale = 1;
@@ -87,12 +100,16 @@ namespace BookShuffler.ViewModels
 
             this.LoadSettings();
 
+            // Open Last Project
+            // ====================================================================================
             if (!string.IsNullOrEmpty(this.Settings?.LastOpenedProject)
                 && File.Exists(this.Settings.LastOpenedProject))
             {
                 this.OpenProject(this.Settings.LastOpenedProject);
             }
         }
+        
+        public Interaction<ProjectCategories, Unit> EditCategories { get; }
 
         public AppSettings Settings { get; private set; }
 
@@ -115,6 +132,7 @@ namespace BookShuffler.ViewModels
             }
         }
 
+        public ICommand EditCategoryCommand { get; }
         public ICommand SetCanvasScale { get; }
         public ICommand SetTreeScale { get; }
 
@@ -128,6 +146,7 @@ namespace BookShuffler.ViewModels
         public ICommand AttachSelectedCommand { get; }
         public ICommand CreateCardCommand { get; }
         public ICommand CreateSectionCommand { get; }
+        
 
         public ICommand AutoTileActiveSectionCommand { get; }
 
