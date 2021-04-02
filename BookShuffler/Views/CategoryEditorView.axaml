@@ -3,6 +3,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewModels="clr-namespace:BookShuffler.ViewModels"
+        xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
         mc:Ignorable="d" 
         Width="400"
         Height="500"
@@ -14,19 +15,72 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <StackPanel Grid.Row="0"
-                    Orientation="Horizontal"></StackPanel>
+                    
+                    Orientation="Horizontal">
+            <Button Margin="2"
+                    Command="{Binding CreateNew}">
+                <avalonia:MaterialIcon Kind="Add" />
+            </Button>
+            <Button Margin="2"
+                    Command="{Binding Delete}">
+                <avalonia:MaterialIcon Kind="Minus" />
+            </Button>
+        </StackPanel>
         
         <ListBox Grid.Row="1"
+                 SelectedItem="{Binding SelectedCategory}"
                  Items="{Binding All}">
             <ListBox.ItemTemplate>
                 <DataTemplate>
+                    <Border BorderBrush="Black"
+                            BorderThickness="1"
+                            Background="{Binding Color,Mode=OneWay}"
+                            Padding="7"
+                            CornerRadius="3">
                     <TextBlock Text="{Binding Name}"></TextBlock>
+                        </Border>
                 </DataTemplate>
             </ListBox.ItemTemplate>
             
         </ListBox>
+        
+        <Grid Grid.Row="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Row="0"
+                       Margin="5"
+                   Grid.Column="0"
+                   VerticalAlignment="Center"
+                   Text="Category Name" />
+            <TextBox Grid.Row="0"
+                       Margin="5"
+                       Text="{Binding SelectedCategory.Name}"
+                     VerticalContentAlignment="Center"
+                     Grid.Column="1"></TextBox>
+
+            <TextBlock Grid.Row="1"
+                       Margin="5"
+                       Grid.Column="0"
+                       VerticalAlignment="Center"
+                       Text="Color" />
+            <ComboBox Grid.Row="1"
+                      Margin="5"
+                      VerticalContentAlignment="Center"
+                      SelectedItem="{Binding SelectedCategory.ColorName}"
+                      HorizontalAlignment="Stretch"
+                      Items="{Binding Colors}"
+                      Grid.Column="1" />
+        </Grid>
     </Grid>
+        
 </Window>

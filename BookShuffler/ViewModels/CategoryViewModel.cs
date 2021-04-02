@@ -7,11 +7,12 @@ namespace BookShuffler.ViewModels
 {
     public class CategoryViewModel : ViewModelBase
     {
-        private Color _color;
+        private IBrush _color;
 
         public CategoryViewModel(Category model)
         {
             this.Model = model;
+            this.Color = new SolidColorBrush(Avalonia.Media.Color.Parse(this.Model.ColorName));
         }
 
         public int Id => this.Model.Id;
@@ -36,14 +37,16 @@ namespace BookShuffler.ViewModels
             {
                 if (this.Model.ColorName == value) return;
                 this.Model.ColorName = value;
-                this.Color = Color.Parse(this.Model.ColorName);
-                this.RaisePropertyChanged(nameof(Color));
                 this.RaisePropertyChanged(nameof(ColorName));
+                this.Color = new SolidColorBrush(Avalonia.Media.Color.Parse(this.Model.ColorName));
             }
         }
 
         [YamlIgnore]
-        public Color Color { get; private set; }
-        
+        public IBrush Color
+        {
+            get => _color;
+            set => this.RaiseAndSetIfChanged(ref _color, value);
+        }
     }
 }
