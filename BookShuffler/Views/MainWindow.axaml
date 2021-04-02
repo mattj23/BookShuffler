@@ -76,20 +76,20 @@
             <MenuItem Header="View">
                 
                 <MenuItem Header="Canvas Scale">
-                    <MenuItem Header="40%" Command="{Binding Command.SetCanvasScale}" CommandParameter="0.4" />
-                    <MenuItem Header="60%" Command="{Binding Command.SetCanvasScale}" CommandParameter="0.6" />
-                    <MenuItem Header="80%" Command="{Binding Command.SetCanvasScale}" CommandParameter="0.8" />
-                    <MenuItem Header="100%" Command="{Binding Command.SetCanvasScale}" CommandParameter="1.0" />
-                    <MenuItem Header="120%" Command="{Binding Command.SetCanvasScale}" CommandParameter="1.2" />
-                    <MenuItem Header="140%" Command="{Binding Command.SetCanvasScale}" CommandParameter="1.4" />
-                    <MenuItem Header="160%" Command="{Binding Command.SetCanvasScale}" CommandParameter="1.6" />
+                    <MenuItem Header="40%" Command="{Binding Commands.SetCanvasScale}" CommandParameter="0.4" />
+                    <MenuItem Header="60%" Command="{Binding Commands.SetCanvasScale}" CommandParameter="0.6" />
+                    <MenuItem Header="80%" Command="{Binding Commands.SetCanvasScale}" CommandParameter="0.8" />
+                    <MenuItem Header="100%" Command="{Binding Commands.SetCanvasScale}" CommandParameter="1.0" />
+                    <MenuItem Header="120%" Command="{Binding Commands.SetCanvasScale}" CommandParameter="1.2" />
+                    <MenuItem Header="140%" Command="{Binding Commands.SetCanvasScale}" CommandParameter="1.4" />
+                    <MenuItem Header="160%" Command="{Binding Commands.SetCanvasScale}" CommandParameter="1.6" />
                 </MenuItem>
                 
                 <MenuItem Header="Project Tree Scale">
-                    <MenuItem Header="40%" Command="{Binding Command.SetTreeScale}" CommandParameter="0.4" />
-                    <MenuItem Header="60%" Command="{Binding Command.SetTreeScale}" CommandParameter="0.6" />
-                    <MenuItem Header="80%" Command="{Binding Command.SetTreeScale}" CommandParameter="0.8" />
-                    <MenuItem Header="100%" Command="{Binding Command.SetTreeScale}" CommandParameter="1.0" />
+                    <MenuItem Header="40%" Command="{Binding Commands.SetTreeScale}" CommandParameter="0.4" />
+                    <MenuItem Header="60%" Command="{Binding Commands.SetTreeScale}" CommandParameter="0.6" />
+                    <MenuItem Header="80%" Command="{Binding Commands.SetTreeScale}" CommandParameter="0.8" />
+                    <MenuItem Header="100%" Command="{Binding Commands.SetTreeScale}" CommandParameter="1.0" />
                 </MenuItem>
             </MenuItem>
         </Menu>
@@ -126,15 +126,15 @@
                             <TreeView.ContextMenu>
                                 <ContextMenu>
                                     <MenuItem Header="Detach Selected"
-                                              Command="{Binding DetachSelectedCommand}" />
+                                              Command="{Binding Commands.DetachEntity}" />
 
                                     <Separator />
 
                                     <MenuItem Header="New Index Card"
-                                              Command="{Binding CreateCardCommand}" />
+                                              Command="{Binding Commands.CreateCard}" />
 
                                     <MenuItem Header="New Section"
-                                              Command="{Binding CreateSectionCommand}" />
+                                              Command="{Binding Commands.CreateSection}" />
 
                                     <Separator />
 

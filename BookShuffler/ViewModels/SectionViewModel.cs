@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive.Linq;
@@ -141,5 +142,34 @@ namespace BookShuffler.ViewModels
             if (other is null) return false;
             return other.Id == this.Id;
         }
+
+        public IndexCardViewModel[] GetDescendantsInOrder()
+        {
+            var cards = new List<IndexCardViewModel>();
+            var sections = new List<SectionViewModel>();
+            
+            this.RecursiveCardSearch(this, cards, sections);
+
+            return cards.ToArray();
+        }
+
+        private void RecursiveCardSearch(IEntityViewModel vm, List<IndexCardViewModel> cards,
+            List<SectionViewModel> sections)
+        {
+            if (vm is IndexCardViewModel card)
+            {
+                cards.Add(card);
+                return;
+            }
+
+            if (vm is SectionViewModel sec)
+            {
+                foreach (var childVm in sec.Entities)
+                {
+                    this.RecursiveCardSearch(childVm, cards, sections);
+                }
+            }
+        }
+        
     }
 }
