@@ -3,87 +3,118 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             xmlns:viewModels="clr-namespace:BookShuffler.ViewModels"
              mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="300"
              DataContextChanged="StyledElement_OnDataContextChanged"
-             x:Class="BookShuffler.Views.EntityView">
-
-    <Border BorderBrush="Black"
-            CornerRadius="5"
-            BorderThickness="2"
-            Padding="7"
-            MaxWidth="400"
-            MaxHeight="400"
-            Background="WhiteSmoke"
-            PointerEnter="Border_OnPointerEnter"
-            PointerLeave="Border_OnPointerLeave"
-            Tag="{Binding}">
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
-
-            <DockPanel Grid.Row="0">
-                <Button DockPanel.Dock="Right"
-                        x:Name="SummaryEditButton"
-                        Click="SummaryEditButton_OnClick"
-                        IsVisible="False">
-                    <avalonia:MaterialIcon Kind="Edit" />
-                        
-                </Button>
-                
-                <TextBlock DockPanel.Dock="Left"
-                           x:Name="SummaryTextBlock"
-                           TextWrapping="Wrap"
-                           FontWeight="Bold"
-                           Margin="3"
-                           Text="{Binding Summary}" />
-                
-            </DockPanel>
-            
-            <TextBox Grid.Row="0"
-                     x:Name="SummaryTextBox"
-                     KeyDown="SummaryTextBox_OnKeyDown"
-                     TextWrapping="WrapWithOverflow"
-                     IsVisible="False"
-                     FontWeight="Bold"
-                     Text="{Binding Summary} "/>
-            
-
-            <Separator Grid.Row="1"
-                       BorderBrush="Black"
-                       BorderThickness="1" />
-
-            <ScrollViewer Grid.Row="2"
-                          MaxHeight="300"
-                          HorizontalScrollBarVisibility="Disabled"
-                          VerticalScrollBarVisibility="Auto">
-                
-                <Panel>
-                    <ItemsControl x:Name="EntityContent"
-                                  Items="{Binding Entities}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Border BorderBrush="Black"
-                                        BorderThickness="1"
-                                        Margin="2"
-                                        Padding="1"
-                                        CornerRadius="3">
-                                    <TextBlock Text="{Binding Summary}"
-                                               TextWrapping="Wrap" />
-                                </Border>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                    <TextBlock Text="{Binding Content}"
-                               Margin="5"
-                               x:Name="TextContent"
-                               TextWrapping="Wrap" />
-                </Panel>
-                
-            </ScrollViewer>
-        </Grid>
-    </Border>
+             x:Class="BookShuffler.Views.EntityView"
+             PointerLeave="Border_OnPointerLeave"
+             PointerEnter="Border_OnPointerEnter">
+    <Design.DataContext>
+        <viewModels:IndexCardViewModel />
+    </Design.DataContext>
     
+    <Panel>
+
+        <Border BorderBrush="Black"
+                CornerRadius="5"
+                BorderThickness="2"
+                Padding="7"
+                MaxWidth="400"
+                MaxHeight="400"
+                Background="{Binding Category.Color,FallbackValue=White}"
+                Tag="{Binding}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <DockPanel Grid.Row="0">
+                    <Button DockPanel.Dock="Right"
+                            x:Name="SummaryEditButton"
+                            Click="SummaryEditButton_OnClick"
+                            IsVisible="False">
+                        <avalonia:MaterialIcon Kind="Edit" />
+
+                    </Button>
+
+                    <TextBlock DockPanel.Dock="Left"
+                               x:Name="SummaryTextBlock"
+                               TextWrapping="Wrap"
+                               FontWeight="Bold"
+                               Margin="3"
+                               Text="{Binding Summary}" />
+
+                </DockPanel>
+
+                <TextBox Grid.Row="0"
+                         x:Name="SummaryTextBox"
+                         KeyDown="SummaryTextBox_OnKeyDown"
+                         TextWrapping="WrapWithOverflow"
+                         IsVisible="False"
+                         FontWeight="Bold"
+                         Text="{Binding Summary} " />
+
+
+                <Separator Grid.Row="1"
+                           BorderBrush="Black"
+                           BorderThickness="1" />
+
+                <ScrollViewer Grid.Row="2"
+                              MaxHeight="300"
+                              HorizontalScrollBarVisibility="Disabled"
+                              VerticalScrollBarVisibility="Auto">
+
+                    <Panel>
+                        <ItemsControl x:Name="EntityContent"
+                                      Items="{Binding Entities}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border BorderBrush="Black"
+                                            BorderThickness="1"
+                                            Margin="2"
+                                            Padding="1"
+                                            Background="{Binding Category.Color, FallbackValue=White}"
+                                            CornerRadius="3">
+                                        <TextBlock Text="{Binding Summary}"
+                                                   TextWrapping="Wrap" />
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <TextBlock Text="{Binding Content}"
+                                   Margin="5"
+                                   x:Name="TextContent"
+                                   TextWrapping="Wrap" />
+                    </Panel>
+
+                </ScrollViewer>
+            </Grid>
+        </Border>
+    
+            <Border x:Name="EditMenu" 
+                    BorderBrush="Black"
+                    BorderThickness="2"
+                    CornerRadius="5"
+                    Padding="5"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Bottom"
+                    Background="WhiteSmoke">
+                <StackPanel Orientation="Horizontal">
+                    <ComboBox Items="{Binding ProjectCategories.All}"
+                              x:Name="CategorySelector"
+                              SelectedItem="{Binding Category}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Name}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </StackPanel>
+                     
+            
+            </Border>
+    </Panel>
+
 </UserControl>

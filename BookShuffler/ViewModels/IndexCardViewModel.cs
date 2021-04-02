@@ -14,6 +14,8 @@ namespace BookShuffler.ViewModels
 
         public Guid Id => Model.Id;
 
+        public IndexCardViewModel() : this(new IndexCard())  {}
+        
         public IndexCardViewModel(IndexCard model)
         {
             this.Model = model;

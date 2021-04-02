@@ -16,6 +16,8 @@ namespace BookShuffler.Views
         private Button _summaryButton;
         private TextBlock _textContent;
         private ItemsControl _entityContent;
+        private Border _menuBorder;
+        private ComboBox _categorySelector;
         
         public EntityView()
         {
@@ -30,16 +32,21 @@ namespace BookShuffler.Views
             _summaryButton = this.FindControl<Button>("SummaryEditButton");
             _textContent = this.FindControl<TextBlock>("TextContent");
             _entityContent = this.FindControl<ItemsControl>("EntityContent");
+            _categorySelector = this.FindControl<ComboBox>("CategorySelector");
+            _menuBorder = this.FindControl<Border>("EditMenu");
+            _menuBorder.IsVisible = false;
         }
 
         private void Border_OnPointerEnter(object? sender, PointerEventArgs e)
         {
             _summaryButton.IsVisible = true;
+            _menuBorder.IsVisible = true;
         }
 
         private void Border_OnPointerLeave(object? sender, PointerEventArgs e)
         {
             _summaryButton.IsVisible = false;
+            _menuBorder.IsVisible = false;
         }
 
         private void SummaryEditButton_OnClick(object? sender, RoutedEventArgs e)
@@ -63,6 +70,7 @@ namespace BookShuffler.Views
             {
                 this._entityContent.IsVisible = false;
                 this._textContent.IsVisible = true;
+                this._categorySelector.IsVisible = true;
                 return;
             }
 
@@ -70,6 +78,7 @@ namespace BookShuffler.Views
             {
                 this._entityContent.IsVisible = true;
                 this._textContent.IsVisible = false;
+                this._categorySelector.IsVisible = false;
                 return;
             }
         }
