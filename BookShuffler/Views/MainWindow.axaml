@@ -144,10 +144,10 @@
                                     <Separator />
 
                                     <MenuItem Header="Open in Editor"
-                                              Command="{Binding LaunchEditorCommand}" />
+                                              Command="{Binding Commands.OpenMarkdown}" />
 
                                     <MenuItem Header="Reload from File"
-                                              Command="{Binding LoadFromFileCommand}" />
+                                              Command="{Binding Commands.ReloadMarkdown}" />
 
                                 </ContextMenu>
                             </TreeView.ContextMenu>

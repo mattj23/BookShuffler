@@ -124,6 +124,16 @@ namespace BookShuffler.ViewModels
 
         public IndexCard Model { get; }
 
+        public void CopyValuesFrom(IndexCard model)
+        {
+            this.Label = model.Label;
+            this.Summary = model.Summary;
+            this.Content = model.Content ?? string.Empty;
+            this.Notes = model.Notes;
+            this.Model.CategoryId = model.CategoryId;
+            this.RaisePropertyChanged(nameof(Category));
+        }
+
         public void SetViewOffset(Point offset)
         {
             this._viewOffset = offset;

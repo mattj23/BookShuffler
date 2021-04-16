@@ -43,6 +43,7 @@ namespace BookShuffler.Views
             this.WhenActivated(d => d(ViewModel.OpenProject.RegisterHandler(DoOpenProjectAsync)));
             this.WhenActivated(d => d(ViewModel.ImportMarkdown.RegisterHandler(DoImportMarkdownAsync)));
             this.WhenActivated(d => d(ViewModel.ExportMarkdown.RegisterHandler(DoSelectExportFile)));
+            this.WhenActivated(d => d(ViewModel.ShowWarningMessage.RegisterHandler(DoShowWarningMessage)));
         }
 
         private AppViewModel? ViewModel => DataContext as AppViewModel;
@@ -55,6 +56,12 @@ namespace BookShuffler.Views
         
         // Interactions 
         // ======================================================================================================
+        private async Task DoShowWarningMessage(InteractionContext<WarningMessage, Unit> interaction)
+        {
+            var dialog = MessageBoxManager.GetMessageBoxStandardWindow(interaction.Input.Title,
+                interaction.Input.Message, ButtonEnum.Ok);
+            await dialog.ShowDialog(this);
+        }
 
         private async Task DoEditCategoriesAsync(InteractionContext<ProjectCategories, Unit> interaction)
         {

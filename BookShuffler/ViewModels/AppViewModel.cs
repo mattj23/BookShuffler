@@ -121,9 +121,26 @@ namespace BookShuffler.ViewModels
                 CreateCard = ReactiveCommand.Create(this.AddCardToSelected, hasActiveSection),
                 CreateSection = ReactiveCommand.Create(this.AddSectionToSelected, hasActiveSection),
                 SetCanvasScale = ReactiveCommand.Create<string>(d => this.SetCanvasScaleValue(double.Parse(d))),
-                SetTreeScale = ReactiveCommand.Create<string>(d => this.SetTreeScaleValue(double.Parse(d)))
+                SetTreeScale = ReactiveCommand.Create<string>(d => this.SetTreeScaleValue(double.Parse(d))),
+                
+                OpenMarkdown = ReactiveCommand.Create(async () =>
+                {
+                    if (this.Project?.HasUnsavedChanges != false)
+                    {
+                        await this.ShowWarningMessage.Handle(new WarningMessage
+                        {
+                            Title = "Must Save Changes",
+                            Message =
+                                "Any unsaved changes must be saved before a file can be opened in an external editor"
+                        });
+                        return;
+                    }
+                    
+                    this.LaunchEditorOnSelected();
+                }, hasSelection),
+                
+                ReloadMarkdown = ReactiveCommand.Create(this.LoadSelectedFromFile, hasSelection),
             };
-
 
             // Interactions
             // ====================================================================================
@@ -132,6 +149,7 @@ namespace BookShuffler.ViewModels
             this.OpenProject = new Interaction<Unit, string?>();
             this.ImportMarkdown = new Interaction<Unit, string[]?>();
             this.ExportMarkdown = new Interaction<Unit, string?>();
+            this.ShowWarningMessage = new Interaction<WarningMessage, Unit>();
 
             // Settings
             // ====================================================================================
@@ -160,6 +178,7 @@ namespace BookShuffler.ViewModels
         public Interaction<Unit, string?> OpenProject { get; }
         public Interaction<Unit, string[]?> ImportMarkdown { get; }
         public Interaction<Unit, string?> ExportMarkdown { get; }
+        public Interaction<WarningMessage, Unit> ShowWarningMessage { get; }
         
 
         public AppSettings Settings { get; private set; }
@@ -187,9 +206,6 @@ namespace BookShuffler.ViewModels
                 _projectSubscriptions.Add(_project.EntityDetached.Subscribe(e => this.SelectedDetachedEntity = e));
             }
         }
-        public ICommand LaunchEditorCommand { get; }
-        public ICommand LoadFromFileCommand { get; }
-
 
         public double CanvasScale
         {
@@ -330,6 +346,7 @@ namespace BookShuffler.ViewModels
             var folder = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
                 "BookShuffler");
             var filePath = System.IO.Path.Combine(folder, "settings.yaml");
+            Console.WriteLine($"Loading settings from {filePath}");
             if (!Directory.Exists(folder)) Directory.CreateDirectory(folder);
 
             if (File.Exists(filePath))
@@ -392,61 +409,60 @@ namespace BookShuffler.ViewModels
             _storage.Put(path, text);
         }
 
-        // private string SelectedEntityFile()
-        // {
-        //     if (_selectedEntity is SectionViewModel)
-        //     {
-        //         return Path.Combine(_projectPath, ProjectLoader.SectionFolderName, $"{_selectedEntity.Id}.yaml");
-        //     }
-        //
-        //     if (_selectedEntity is IndexCardViewModel)
-        //     {
-        //         return Path.Combine(_projectPath, ProjectLoader.CardFolderName, $"{_selectedEntity.Id}.md");
-        //     }
-        //
-        //     throw new ArgumentException($"No file known for type {_selectedEntity.GetType()}");
-        // }
-        //
-        // private void LaunchEditorOnSelected()
-        // {
-        //     if (_selectedEntity is not null)
-        //     {
-        //         var file = this.SelectedEntityFile();
-        //         if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-        //         {
-        //             var process = new Process {StartInfo = {FileName = "xdg-open", Arguments = file}};
-        //             process.Start();
-        //         }
-        //         else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-        //         {
-        //             var process = new Process {StartInfo = {FileName = "open", Arguments = file}};
-        //             process.Start();
-        //         }
-        //         else
-        //         {
-        //             Process.Start(file);
-        //         }
-        //     }
-        // }
+        private string SelectedEntityFile()
+        {
+            if (_selectedEntity is SectionViewModel)
+            {
+                return Path.Combine(this.Project.ProjectFolder, ProjectLoader.SectionFolderName, $"{_selectedEntity.Id}.yaml");
+            }
+        
+            if (_selectedEntity is IndexCardViewModel)
+            {
+                return Path.Combine(this.Project.ProjectFolder, ProjectLoader.CardFolderName, $"{_selectedEntity.Id}.md");
+            }
+        
+            throw new ArgumentException($"No file known for type {_selectedEntity?.GetType()}");
+        }
+        
+        private void LaunchEditorOnSelected()
+        {
+            if (_selectedEntity is not null)
+            {
+                var file = this.SelectedEntityFile();
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                {
+                    var process = new Process {StartInfo = {FileName = "xdg-open", Arguments = file}};
+                    process.Start();
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                {
+                    var process = new Process {StartInfo = {FileName = "open", Arguments = file}};
+                    process.Start();
+                }
+                else
+                {
+                    Process.Start(file);
+                }
+            }
+        }
 
         private void LoadSelectedFromFile()
         {
-            // if (_selectedEntity is IndexCardViewModel card)
-            // {
-            //     var loaded = EntityWriter.LoadIndexCard(this.SelectedEntityFile());
-            //     card.Label = loaded.Label;
-            //     card.Summary = loaded.Summary;
-            //     card.Notes = loaded.Notes;
-            //     card.Content = loaded.Content;
-            // }
-            //
-            // if (_selectedEntity is SectionViewModel section)
-            // {
-            //     var loaded = EntityWriter.LoadSection(this.SelectedEntityFile());
-            //     section.Label = loaded.Label;
-            //     section.Summary = loaded.Summary;
-            //     section.Notes = loaded.Notes;
-            // }
+            var reader = new EntityReader(_storage);
+            
+            if (_selectedEntity is IndexCardViewModel card)
+            {
+                var loaded = reader.LoadIndexCard(this.SelectedEntityFile());
+                if (loaded is not null) 
+                    card.CopyValuesFrom(loaded);
+            }
+            
+            if (_selectedEntity is SectionViewModel section)
+            {
+                var loaded = reader.LoadSection(this.SelectedEntityFile());
+                if (loaded is not null) 
+                    section.CopyValuesFrom(loaded.ToEntity());
+            }
         }
 
         private void DeleteSelected()

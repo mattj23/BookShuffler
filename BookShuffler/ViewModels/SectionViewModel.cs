@@ -7,6 +7,7 @@ using System.Reactive.Subjects;
 using System.Windows.Input;
 using Avalonia;
 using BookShuffler.Models;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using ReactiveUI;
 
 namespace BookShuffler.ViewModels
@@ -135,6 +136,13 @@ namespace BookShuffler.ViewModels
         {
             this._viewOffset = offset;
             this.RaisePropertyChanged(nameof(ViewPosition));
+        }
+
+        public void CopyValuesFrom(Entity model)
+        {
+            this.Summary = model.Summary;
+            this.Notes = model.Notes;
+            this.Label = model.Label;
         }
 
         public bool Equals(IEntityViewModel? other)

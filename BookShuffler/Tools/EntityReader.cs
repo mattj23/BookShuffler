@@ -1,5 +1,6 @@
 ﻿using BookShuffler.Models;
 using BookShuffler.Tools.Storage;
+using YamlDotNet.Serialization;
 
 namespace BookShuffler.Tools
 {
@@ -14,13 +15,17 @@ namespace BookShuffler.Tools
 
         public SerializableSection LoadSection(string file)
         {
-            var deserializer = new YamlDotNet.Serialization.Deserializer();
+            var deserializer = new DeserializerBuilder()
+                .IgnoreUnmatchedProperties()
+                .Build();
             return deserializer.Deserialize<SerializableSection>(_storage.Get(file));
         }
 
         public IndexCard? LoadIndexCard(string file)
         {
-            var deserializer = new YamlDotNet.Serialization.Deserializer();
+            var deserializer = new DeserializerBuilder()
+                .IgnoreUnmatchedProperties()
+                .Build();
             var text = _storage.Get(file);
             var parts = text.Split("---", 3);
 

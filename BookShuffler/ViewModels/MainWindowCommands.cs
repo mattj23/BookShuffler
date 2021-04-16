@@ -24,5 +24,9 @@ namespace BookShuffler.ViewModels
         
         public ICommand ExportRoot { get; set; }
         public ICommand ExportSection { get; set; }
+        
+        public ICommand OpenMarkdown { get; set; }
+        
+        public ICommand ReloadMarkdown { get; set; }
     }
 }
