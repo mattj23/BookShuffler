@@ -4,6 +4,8 @@
 
 *BookShuffler* is in an early proof-of-concept stage and was put together quickly to aid in the reorganization of one particular 400+ page book for an author facing a deadline.  Features were added as needed to support that effort, but given that *BookShuffler* turned out to be a useful tool I would like to develop it further, time permitting.
 
+![Bookshuffler Screenshot](https://github.com/mattj23/BookShuffler/blob/main/docs/screenshot-0.png?raw=true)
+
 ## Features
 
 Currently *BookShuffler* can ingest annotated markdown, which it will break into "sections" and "cards" and store as flat files in a project folder.  A writing project's structure takes the form of a tree, where "cards" are leaves and "sections" are nodes with children.
