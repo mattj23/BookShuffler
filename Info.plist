@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
     <key>CFBundleIconFile</key>
-    <string>myicon-logo.icns</string>
+    <string>avalonia-logo.ico</string>
     <key>CFBundleIdentifier</key>
     <string>com.identifier</string>
     <key>CFBundleName</key>
@@ -13,7 +13,7 @@
     <key>LSMinimumSystemVersion</key>
     <string>10.12</string>
     <key>CFBundleExecutable</key>
-    <string>BookShuffler.Avalonia</string>
+    <string>BookShuffler</string>
     <key>CFBundleInfoDictionaryVersion</key>
     <string>6.0</string>
     <key>CFBundlePackageType</key>
